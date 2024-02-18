@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1018771886293",
+    "project_id": "chuttu-29802",
+    "storage_bucket": "chuttu-29802.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1018771886293:android:eb72489b53a9fef1e5d25c",
+        "android_client_info": {
+          "package_name": "com.example.chuttu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7kCc4kTXML82U5yktjrYxUVFZM9Dp-U0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
