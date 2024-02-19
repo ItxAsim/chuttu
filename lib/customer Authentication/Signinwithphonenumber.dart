@@ -19,7 +19,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
         phoneNumber: _phoneNumberController.text, // Replace with your country code if needed.
         verificationCompleted: (PhoneAuthCredential credential) async {
           await FirebaseAuth.instance.signInWithCredential(credential);
-          _showSnackbar('Auto login successful.');
+          _showSnackbar('phone verification successfull.');
         },
         verificationFailed: (FirebaseAuthException e) {
           _showSnackbar('Verification failed: ${e.code}');
@@ -49,7 +49,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
         smsCode: _smsCodeController.text,
       );
       await FirebaseAuth.instance.signInWithCredential(credential);
-      _showSnackbar('Phone number sign in successful.');
+      _showSnackbar('Phone number verfication   successful.');
       Navigator.push(context, MaterialPageRoute(builder: (context)=>myhome()));
 
     } catch (e) {
