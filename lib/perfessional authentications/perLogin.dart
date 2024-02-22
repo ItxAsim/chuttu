@@ -1,4 +1,5 @@
 import 'package:chuttu/customer%20Authentication/signuppage.dart';
+import 'package:chuttu/perfessional%20authentications/Perfessional%20Service%20Page.dart';
 import 'package:chuttu/perfessional%20authentications/perSignunp.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -32,7 +33,7 @@ class _PerLoginPageState extends State<PerLoginPage> {
         const SnackBar(content: Text("Login Successful")),
       );
       User? user = userCredential.user;
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => myhome()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ProfessionalServicesPage()));
     } catch (e) {
       setState(() {
         signed=false;
