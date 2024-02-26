@@ -1,3 +1,4 @@
+import 'package:chuttu/perfessional%20authentications/Document%20verification.dart';
 import 'package:chuttu/perfessional%20authentications/bottomNavigationPerfessional.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -47,7 +48,7 @@ class _ProfessionalServicesPageState extends State<ProfessionalServicesPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => UserServicesPage(),
+            builder: (context) => Documentverification(),
           ),
         );
       }

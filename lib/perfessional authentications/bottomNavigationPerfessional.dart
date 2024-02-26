@@ -54,7 +54,7 @@ class _bottomnavigationState extends State<Perbottomnavigation> {
         case 2:
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AdminPage()),
+            MaterialPageRoute(builder: (context) => AdminApprovalPage()),
           );
           break;
 
