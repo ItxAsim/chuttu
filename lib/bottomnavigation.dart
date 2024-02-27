@@ -1,5 +1,5 @@
 
-import 'package:chuttu/admin%20console.dart';
+
 import 'package:chuttu/createPost.dart';
 import 'package:chuttu/userRagistration.dart';
 import 'package:chuttu/userprofile.dart';

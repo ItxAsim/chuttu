@@ -51,6 +51,7 @@ dependencies:
   firebase_app_check: ^0.2.1+14
   provider: ^6.1.1
   permission_handler: ^11.2.0
+  cloud_firestore_web: ^3.10.5
 
 dev_dependencies:
   flutter_test:
@@ -81,6 +82,9 @@ flutter:
     - images/tap.jpg
     - images/chair.jpg
     - images/furniture.jpg
+    - images/bgcard.jpg
+    - images/webLogin.jpg
+    - images/blur.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

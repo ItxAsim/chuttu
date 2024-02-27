@@ -275,7 +275,7 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
                     child: ListTile(
                       
                       title: Text('Dcoument verfication'),
-                      trailing: status=='approved'?Icon(Icons.verified):Text("pending"),
+                      trailing: status=='approved'?Icon(Icons.verified ,color: Colors.blueAccent,):Text("pending"),
                     ),
                   ),
                 ),
