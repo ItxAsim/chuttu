@@ -1,4 +1,5 @@
 
+import 'package:chuttu/perfessional%20authentications/Perfessional%20Service%20Page.dart';
 import 'package:chuttu/perfessional%20authentications/perLogin.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -99,7 +100,7 @@ class _PerSignupPageState extends State<PerSignupPage> {
           });
           _signInWithPhoneNumber();
           if(verify==true)
-         { Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PerLoginPage()));}
+         { Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ProfessionalServicesPage()));}
         }
       } catch (e) {
         setState(() {

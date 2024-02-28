@@ -112,22 +112,7 @@ class _ProfessionalServicesPageState extends State<ProfessionalServicesPage> {
         ],
 
       ),
-      bottomNavigationBar: Perbottomnavigation(
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person ),
-            label: 'Dashboard',),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'ADD Services',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_moderator_rounded),
-            label: 'admin',
-          ),
-        ],
-        selectedIndex: _selectedIndex,
-      ),
+
     );
   }
 }

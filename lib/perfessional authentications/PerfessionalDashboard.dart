@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chuttu/perfessional%20authentications/Document%20verification.dart';
+import 'package:chuttu/perfessional%20authentications/Perfessional%20Service%20Page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -280,9 +281,15 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
                   ),
                 ),
                 SizedBox(height: 16.0),
-                Text(
-                  'Services',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                InkWell(
+                  onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfessionalServicesPage())),
+                  child: ListTile(
+                    title: Text( 'Services',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                    trailing: Icon(Icons.add),
+                    
+                   
+                  ),
                 ),
                 SizedBox(height: 8.0),
                 if (services != null)

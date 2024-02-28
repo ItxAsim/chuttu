@@ -4,6 +4,8 @@ import 'package:chuttu/Admin/AdminAprroval.dart';
 import 'package:chuttu/createPost.dart';
 import 'package:chuttu/perfessional%20authentications/Perfessional%20Service%20Page.dart';
 import 'package:chuttu/perfessional%20authentications/PerfessionalDashboard.dart';
+import 'package:chuttu/perfessional%20authentications/gigcreationpage.dart';
+import 'package:chuttu/perfessional%20authentications/perhome.dart';
 import 'package:chuttu/userRagistration.dart';
 import 'package:chuttu/userprofile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -36,13 +38,13 @@ class _bottomnavigationState extends State<Perbottomnavigation> {
       case 0:
         Navigator.push(
           context,
-         MaterialPageRoute(builder: (context) => ProfessionalDashboard()),
+         MaterialPageRoute(builder: (context) => perhome()),
        );
        break;
         case 1:
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ProfessionalServicesPage()),
+            MaterialPageRoute(builder: (context) => GigCreationPage()),
           );
           break;
         // case 2:
@@ -54,7 +56,7 @@ class _bottomnavigationState extends State<Perbottomnavigation> {
         case 2:
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AdminApprovalPage()),
+            MaterialPageRoute(builder: (context) => ProfessionalDashboard()),
           );
           break;
 
