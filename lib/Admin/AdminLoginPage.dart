@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:chuttu/Admin/AdminAprroval.dart';
+import 'package:chuttu/Admin/navbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -33,7 +34,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
           // Navigate to the admin dashboard
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => AdminApprovalPage()),
+            MaterialPageRoute(builder: (context) => navbar()),
           );
         } else {
           setState(() {

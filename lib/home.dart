@@ -1,3 +1,4 @@
+
 import 'package:chuttu/servicepage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'Servicedetailspage.dart';
 import 'bottomnavigation.dart';
+import 'customer/Services.dart';
 class myhome extends StatefulWidget {
   const myhome({super.key});
 
@@ -60,7 +62,7 @@ class _myhomeState extends State<myhome> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ServicePage()),
+                  MaterialPageRoute(builder: (context) => ApprovedGigsPage()),
                 );
               },
             ),

@@ -7,7 +7,7 @@ import 'package:chuttu/perfessional%20authentications/PerfessionalDashboard.dart
 import 'package:chuttu/perfessional%20authentications/gigcreationpage.dart';
 import 'package:chuttu/perfessional%20authentications/perhome.dart';
 import 'package:chuttu/userRagistration.dart';
-import 'package:chuttu/userprofile.dart';
+import 'package:chuttu/customer/userprofile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../Home.dart';

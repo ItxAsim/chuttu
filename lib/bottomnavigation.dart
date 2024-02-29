@@ -2,7 +2,7 @@
 
 import 'package:chuttu/createPost.dart';
 import 'package:chuttu/userRagistration.dart';
-import 'package:chuttu/userprofile.dart';
+import 'package:chuttu/customer/userprofile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'Home.dart';

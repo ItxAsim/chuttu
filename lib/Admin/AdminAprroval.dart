@@ -8,6 +8,7 @@ class AdminApprovalPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Admin Approval'),
       ),
+
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('perfessionals').snapshots(),
         builder: (context, snapshot) {

@@ -20,9 +20,8 @@ class _UserGigsPageState extends State<UserGigsPage> {
     _user = FirebaseAuth.instance.currentUser!;
     _gigsStream = FirebaseFirestore.instance
         .collection('perfessionals')
-        .doc(_user.uid)
-        .collection('gigs')
-        .snapshots();
+        .doc(_user.uid).snapshots() as Stream<QuerySnapshot<Object?>>;
+
   }
    int _selectedIndex=0;
   @override
@@ -50,8 +49,8 @@ class _UserGigsPageState extends State<UserGigsPage> {
               final description = gig['description'] ?? '';
               final location = gig['location'] ?? '';
               final price = gig['price'] ?? '';
-              final status = gig['status'] ?? '';
-              final List<dynamic> images = gig['images'] ?? [];
+              final status = gig['gigstatus'] ?? '';
+              final List<dynamic> images = gig['gigimages'] ?? [];
 
               return Card(
                 margin: EdgeInsets.all(8.0),

@@ -55,13 +55,14 @@ class _GigCreationPageState extends State<GigCreationPage> {
       List<String> imageUrls = await _uploadImagesToStorage(imageFiles);
       final User user = _auth.currentUser!;
       // Save gig service details to Firestore
-      await FirebaseFirestore.instance.collection('perfessionals').doc(user.uid).collection('gigs').add({
+      await FirebaseFirestore.instance.collection('perfessionals').doc(user.uid).update({
+        'userId': user.uid,
         'title': _titleController.text,
         'description': _descriptionController.text,
         'location': _locationController.text,
         'price': _priceController.text,
-        'images': imageUrls,
-        'status': 'pending', // Set initial status to pending for admin approval
+        'gigimages': imageUrls,
+        'gigstatus': 'pending', // Set initial status to pending for admin approval
         'createdAt': FieldValue.serverTimestamp(),
       });
 
