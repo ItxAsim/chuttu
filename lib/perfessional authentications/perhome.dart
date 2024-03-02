@@ -49,7 +49,7 @@ class _perhomeState extends State<perhome> {
       ListTile(
         title: Text('My Gigs'),
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>UserGigsPage()));
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>UserGigPage()));
 
         }),
             ListTile(

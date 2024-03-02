@@ -7,22 +7,48 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
+
 class GigCreationPage extends StatefulWidget {
   @override
   _GigCreationPageState createState() => _GigCreationPageState();
 }
-
 class _GigCreationPageState extends State<GigCreationPage> {
-  List<XFile> _selectedImages = [];
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  TextEditingController _titleController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
   TextEditingController _locationController = TextEditingController();
-  TextEditingController _titleController = TextEditingController();
   TextEditingController _priceController = TextEditingController();
 
-  bool _isLoading = false;
+  List<XFile> _selectedImages = []; // Track selected images
 
+  bool _isLoading = false;
+  Future<List<String>> _uploadImagesToStorage(List<XFile> images) async {
+    List<String> imageUrls = [];
+
+    try {
+      for (var image in images) {
+        // Generate a unique image name using Uuid
+        String imageName = Uuid().v1();
+        // Create a reference to the Firebase Storage location
+        Reference ref = FirebaseStorage.instance.ref().child('images/$imageName');
+        // Upload the image file to Firebase Storage
+        await ref.putFile(File(image.path));
+        // Get the download URL of the uploaded image
+        String imageUrl = await ref.getDownloadURL();
+        // Add the download URL to the list
+        imageUrls.add(imageUrl);
+      }
+    } catch (error) {
+      // Handle error uploading images
+      print('Error uploading images: $error');
+    }
+
+    return imageUrls;
+  }
+
+
+  // Function to pick images
   Future<void> _pickImages() async {
     final List<XFile>? pickedFiles = await ImagePicker().pickMultiImage();
     if (pickedFiles != null) {
@@ -32,12 +58,18 @@ class _GigCreationPageState extends State<GigCreationPage> {
     }
   }
 
+  // Function to submit for approval
   Future<void> _submitForApproval() async {
-    if (_selectedImages.isEmpty) {
+    // Check if any gig is selected
+    if (_titleController.text.isEmpty ||
+        _descriptionController.text.isEmpty ||
+        _locationController.text.isEmpty ||
+        _priceController.text.isEmpty ||
+        _selectedImages.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.red,
-          content: Text('Please select images of previous work'),
+          content: Text('Please fill in all fields and select images'),
         ),
       );
       return;
@@ -47,23 +79,23 @@ class _GigCreationPageState extends State<GigCreationPage> {
       _isLoading = true; // Set loading state to true when submission starts
     });
 
-    // Convert XFile images to File objects
-    List<File> imageFiles = _selectedImages.map((image) => File(image.path)).toList();
-
     try {
-      // Upload images to Firebase Storage and get their download URLs
-      List<String> imageUrls = await _uploadImagesToStorage(imageFiles);
       final User user = _auth.currentUser!;
+      // Upload images to Firebase Storage and get their download URLs
+      List<String> imageUrls = await _uploadImagesToStorage(_selectedImages);
       // Save gig service details to Firestore
       await FirebaseFirestore.instance.collection('perfessionals').doc(user.uid).update({
-        'userId': user.uid,
-        'title': _titleController.text,
-        'description': _descriptionController.text,
-        'location': _locationController.text,
-        'price': _priceController.text,
-        'gigimages': imageUrls,
-        'gigstatus': 'pending', // Set initial status to pending for admin approval
-        'createdAt': FieldValue.serverTimestamp(),
+        'gigs': FieldValue.arrayUnion([
+          {
+            'title': _titleController.text,
+            'description': _descriptionController.text,
+            'location': _locationController.text,
+            'price': _priceController.text,
+            'gigimages': imageUrls,
+            'gigstatus': 'pending', // Set initial status to pending for admin approval
+            'createdAt': DateTime.now(), // Set creation time
+          }
+        ])
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -75,6 +107,15 @@ class _GigCreationPageState extends State<GigCreationPage> {
 
       setState(() {
         _isLoading = false; // Set loading state to false when submission is successful
+      });
+
+      // Clear text fields and selected images after submission
+      _titleController.clear();
+      _descriptionController.clear();
+      _locationController.clear();
+      _priceController.clear();
+      setState(() {
+        _selectedImages.clear();
       });
 
       // Show success message or navigate to a different page
@@ -94,30 +135,6 @@ class _GigCreationPageState extends State<GigCreationPage> {
     }
   }
 
-  Future<List<String>> _uploadImagesToStorage(List<File> images) async {
-    List<String> imageUrls = [];
-
-    for (var image in images) {
-      try {
-        // Generate a unique image name using Uuid
-        String imageName = Uuid().v1();
-        // Create a reference to the Firebase Storage location
-        Reference ref = FirebaseStorage.instance.ref().child('images/$imageName');
-        // Upload the image file to Firebase Storage
-        await ref.putFile(image);
-        // Get the download URL of the uploaded image
-        String imageUrl = await ref.getDownloadURL();
-        // Add the download URL to the list
-        imageUrls.add(imageUrl);
-      } catch (error) {
-        // Handle error uploading image
-        print('Error uploading image: $error');
-        // Optionally, you can retry uploading or skip this image
-      }
-    }
-
-    return imageUrls;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,19 +181,23 @@ class _GigCreationPageState extends State<GigCreationPage> {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 8.0),
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 8.0,
-                  children: _selectedImages
-                      .map(
-                        (image) => Image.file(
-                      File(image.path),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 8.0,
+                    mainAxisSpacing: 8.0,
+                  ),
+                  itemCount: _selectedImages.length,
+                  itemBuilder: (context, index) {
+                    return Image.file(
+                      File(_selectedImages[index].path),
                       width: 100,
                       height: 100,
                       fit: BoxFit.cover,
-                    ),
-                  )
-                      .toList(),
+                    );
+                  },
                 ),
                 SizedBox(height: 20.0),
               ],
@@ -191,3 +212,8 @@ class _GigCreationPageState extends State<GigCreationPage> {
     );
   }
 }
+
+
+
+
+

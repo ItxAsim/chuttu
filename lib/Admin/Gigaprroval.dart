@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class GigApproval extends StatefulWidget {
-  @override
-  State<GigApproval> createState() => _GigApprovalState();
-}
-
-class _GigApprovalState extends State<GigApproval> {
+class GigApproval extends StatelessWidget {
+   int index1=0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Gig Approval'),
+        title: Text('Admin Approval'),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('perfessionals').snapshots(),
@@ -23,121 +19,138 @@ class _GigApprovalState extends State<GigApproval> {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          final documents = snapshot.data!.docs;
+          final List<DocumentSnapshot> professionals = snapshot.data!.docs;
 
           return ListView.builder(
-            itemCount: documents.length,
-            itemBuilder: (context, index) => _buildListItem(context, documents[index]), // Pass context explicitly
+            itemCount: professionals.length,
+            itemBuilder: (context, index) {
+              final professional = professionals[index];
+              final professionalData = professional.data() as Map<String, dynamic>;
+              final List<dynamic> gigs = professionalData['gigs'] ?? [];
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    title: Text(professionalData['name']),
+                    subtitle: Text(professionalData['phoneNumber']),
+                  ),
+                  Column(
+                    children: [
+                      for (var i = 0; i < gigs.length; i++)
+                        Card(
+                          margin: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                          child: ListTile(
+                            title: Text(gigs[i]['title']),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Description: ${gigs[i]['description']}'),
+                                Text('Status: ${gigs[i]['gigstatus']}'),
+                                Text('Price: ${gigs[i]['price']}'),
+                                Text('Location: ${gigs[i]['location']}'),
+                                SizedBox(height: 8.0),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () => _approveGig(professional.id, i), // Access index in onPressed
+                                      child: Text('Approve'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () => _rejectGig(professional.id, i), // Access index in onPressed
+                                      child: Text('Reject'),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8.0),
+                                // Display images
+                                SizedBox(
+                                  height: 150,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: (gigs[i]['gigimages'] as List<dynamic>?)?.length ?? 0,
+                                    itemBuilder: (context, imgIndex) {
+                                      final imageUrl = gigs[i]['gigimages'][imgIndex];
+                                      return Padding(
+                                        padding: EdgeInsets.only(right: 8.0),
+                                        child: Image.network(
+                                          imageUrl,
+                                          width: 150,
+                                          height: 150,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+
+                ],
+              );
+            },
           );
         },
       ),
     );
   }
-  Widget _buildListItem(BuildContext context, DocumentSnapshot gigData) {
 
-
-    return ExpansionTile(
-        title: Text(gigData['title']),
-        subtitle: Text(gigData['description']),
-        children: [
-          Column(
-            children: [
-              Text("${gigData['price']}Rs"),
-              Text(gigData['location']),
-              Text(gigData['gigstatus']),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.thumb_up),
-                    onPressed: () {
-                      setState(() {
-
-                      });
-                      _approveGig(gigData.id,context);
-                    },
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.thumb_down),
-                    onPressed: () {
-                      setState(() {
-
-                      });
-                      _rejectGig(gigData.id,context);
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 150, // Adjust height as needed
-            child: Row(
-                children: [
-                  Flexible(
-                    child: GestureDetector(
-                      onTap: () => _showImageFullScreen(context,   gigData['images'][0] as String), // Pass context
-                      child: FadeInImage(
-                        placeholder: AssetImage('images/placeholder.jpeg'),
-                        image: NetworkImage( gigData['gigimages'][0]  as String),
-                        fit: BoxFit.cover,
-                        // Handle image errors
-                      ),
-                    ),
-                  ),
-                ]
-            ),
-          ),
-        ] );
-  }
-  void _showImageFullScreen(BuildContext context, String imageUrl) {
-    // Use the Hero widget for smooth transition animation
-    Navigator.push(
-      context, // Pass context directly
-      MaterialPageRoute(
-        builder: (context) => Hero(
-          tag: imageUrl, // Use the image URL as the tag
-          child: Scaffold(
-            appBar: AppBar(
-              title: Text('Image'),
-            ),
-            body: Center(
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover, // Adjust as needed
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _approveGig(String gigId, BuildContext context) {
+  Future<void> _approveGig(String professionalId, int? gigId) async {
     try {
-      FirebaseFirestore.instance.collection('perfessionals').doc(gigId).update({
-        'gigstatus': 'approved',
-      });
+      final DocumentSnapshot professionalDoc =
+          await FirebaseFirestore.instance.collection('perfessionals').doc(professionalId).get();
+
+      if (professionalDoc.exists) {
+        final List<dynamic> gigs = professionalDoc['gigs']?? [];
+
+        if (gigId != null && gigId >= 0 && gigId < gigs.length) {
+          gigs[gigId]['gigstatus'] = 'Approved';
+
+          await FirebaseFirestore.instance.collection('perfessionals').doc(professionalId).set({
+            'gigs': gigs,
+          },
+              SetOptions(merge: true)
+          );
+        } else {
+          print('Invalid gig ID or out of bounds.');
+        }
+      } else {
+        print('Professional document not found.');
+      }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error approving gig: $error'),
-        ),
-      );
-      print('Error approving gig: $error');
+      print('Error updating gig status: $error');
     }
   }
 
-  void _rejectGig(String gigId, BuildContext context) {
+  Future<void> _rejectGig(String professionalId, int? gigId) async {
     try {
-      FirebaseFirestore.instance.collection('perfessionals').doc(gigId).delete();
+      final DocumentSnapshot professionalDoc =
+          await FirebaseFirestore.instance.collection('perfessionals').doc(professionalId).get();
+
+      if (professionalDoc.exists) {
+        final List<dynamic> gigs = professionalDoc['gigs']?? [];
+
+        if (gigId != null && gigId >= 0 && gigId < gigs.length) {
+          gigs[gigId]['gigstatus'] = 'rejected';
+
+          await FirebaseFirestore.instance.collection('perfessionals').doc(professionalId).set({
+            'gigs': gigs,
+          },
+              SetOptions(merge: true)
+          );
+        } else {
+          print('Invalid gig ID or out of bounds.');
+        }
+      } else {
+        print('Professional document not found.');
+      }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error rejecting gig: $error'),
-        ),
-      );
-      print('Error rejecting gig: $error');
+      print('Error updating gig status: $error');
     }
-  }
 }
+  }
