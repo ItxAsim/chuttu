@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'UserOrderList.dart';
+
 class UserProfileScreen extends StatefulWidget {
   @override
   _UserProfileScreenState createState() => _UserProfileScreenState();
@@ -274,7 +276,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   'Orders',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                // Implement order list display for pending and completed orders
+                ElevatedButton(onPressed: ()=>{
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>UserOrderList(status: 'In Progress')))
+                },
+                  child: Text('IN progress orders'),),
+                ElevatedButton(onPressed: ()=>{
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>UserOrderList(status: 'Completed')))
+                },
+                    child: Text('Completed orders')),
+                ElevatedButton(onPressed: ()=>{
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>UserOrderList(status: 'Accepted')))
+                }, child: Text('Accepted orders'))
               ],
             ),
           );

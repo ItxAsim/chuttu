@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -17,6 +18,7 @@ class OrderDetailsScreen extends StatefulWidget {
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   get professionalId => professionalId;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
 
   @override
@@ -65,6 +67,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   setState(() => isLoading = true); // Set loading state
 
                   try {
+                    final User? user=_auth.currentUser;
                     final DocumentSnapshot professionalDoc =
                     await FirebaseFirestore.instance
                         .collection('perfessionals')
@@ -83,11 +86,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     // Add order to Firestore
                     await FirebaseFirestore.instance.collection('orders').doc(orderId).set({
                       'id': orderId, // Unique order identifier
+                      'customer_id':user?.uid,
+                      'customer_email':user?.email,
                       'userName': userName,
                       'phoneNumber': phoneNumber,
                       'location': location,
                       'title': title,
                       'price': price,
+                      'status':'pending',
                       'professionalId': widget.professionalId,
                       'gigindex': widget.gigindex,
                       'createdAt': FieldValue.serverTimestamp(),

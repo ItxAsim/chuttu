@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'Proffessionalorderlist.dart';
+
 class ProfessionalDashboard extends StatefulWidget {
   @override
   _ProfessionalDashboardState createState() => _ProfessionalDashboardState();
@@ -310,7 +312,18 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
                   'Orders',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                // Implement order list display for pending and completed orders
+                ElevatedButton(onPressed: ()=>{
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfessionalOrderList(status: 'In Progress')))
+                },
+                  child: Text('IN progress orders'),),
+                ElevatedButton(onPressed: ()=>{
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfessionalOrderList(status: 'Completed')))
+                },
+                    child: Text('Completed orders')),
+                ElevatedButton(onPressed: ()=>{
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfessionalOrderList(status: 'Accepted')))
+                }, child: Text('Accepted orders'))
+
               ],
             ),
           );
