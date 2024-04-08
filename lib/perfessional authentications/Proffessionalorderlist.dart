@@ -45,6 +45,7 @@ class ProfessionalOrderList extends StatelessWidget {
                       Text('Phone number: ${order['phoneNumber']}'),
                       Text('Price : ${order['price']}'),
                       Text('your Service: ${order['title']}'),
+                      Text('your Service: ${order['details']}'),
                       SizedBox(
                         height:8.0
                       ),

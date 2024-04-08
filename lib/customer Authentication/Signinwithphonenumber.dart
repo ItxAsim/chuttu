@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:chuttu/customer/home.dart';
 
-import '../Home.dart';
+
 
 class PhoneLogin extends StatefulWidget {
+  const PhoneLogin({super.key});
+
   @override
   _PhoneLoginState createState() => _PhoneLoginState();
 }

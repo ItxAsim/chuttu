@@ -1,13 +1,15 @@
 
+import 'package:chuttu/customer/UserUploadedProblem.dart';
 import 'package:chuttu/servicepage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'Servicedetailspage.dart';
+import '../Servicedetailspage.dart';
+
+import 'Services.dart';
 import 'bottomnavigation.dart';
-import 'customer/Services.dart';
 class myhome extends StatefulWidget {
   const myhome({super.key});
 
@@ -17,6 +19,8 @@ class myhome extends StatefulWidget {
 
 class _myhomeState extends State<myhome> {
   int _selectedIndex = 0;
+  final User? user = FirebaseAuth.instance.currentUser;
+   late final userId ;
   final List<String> services = [
     'Home Mantaince',
     'Tailoring Srvicing',
@@ -24,6 +28,13 @@ class _myhomeState extends State<myhome> {
     'Car Maintainance Services',
 
   ];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    userId=user?.uid;
+  }
+
   @override
   Widget build(BuildContext context) {
     final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -67,19 +78,17 @@ class _myhomeState extends State<myhome> {
               },
             ),
             ListTile(
-              title: Text('Add services'),
+              title: Text('My uploaded Probelms'),
               onTap: () {
-                _signOut(context);
-                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>UserUploadedProblems(userId: userId)));
 
               },
-              trailing: Icon(Icons.add),
+
             ),
             ListTile(
               title: Text('Biddig'),
               onTap: () {
-                _signOut(context);
-                Navigator.pop(context);
+
 
               },
               trailing: Icon(Icons.handyman),

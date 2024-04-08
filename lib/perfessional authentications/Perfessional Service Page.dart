@@ -103,8 +103,8 @@ class _ProfessionalServicesPageState extends State<ProfessionalServicesPage> {
             },
           ),
           ElevatedButton(
-            onPressed: /*selectedLocation != LatLng(0, 0) &&*/
-                selectedServices.isNotEmpty
+            onPressed: selectedLocation != LatLng(0, 0) &&
+            selectedServices.isNotEmpty
                 ? _submitServicesForApproval
                 : null,
             child: Text('Submit for Approval'),

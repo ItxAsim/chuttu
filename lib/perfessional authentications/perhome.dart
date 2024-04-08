@@ -1,5 +1,8 @@
+import 'package:chuttu/perfessional%20authentications/MyBids.dart';
 import 'package:chuttu/perfessional%20authentications/bottomNavigationPerfessional.dart';
+import 'package:chuttu/perfessional%20authentications/listProblem.dart';
 import 'package:chuttu/perfessional%20authentications/usergig.dart';
+import 'package:chuttu/selctionpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +20,11 @@ class _perhomeState extends State<perhome> {
   Future<void> _signOut(BuildContext context) async {
     try {
       await _auth.signOut();
-      Navigator.pop(context); // Close the drawer
+      Navigator.pop(context);// Close the drawer
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => Selectionpage()),
+            (route) => false,
+      );
       // Navigate to the sign-in page or any other page as needed
     } catch (e) {
 
@@ -53,6 +60,18 @@ class _perhomeState extends State<perhome> {
           Navigator.push(context, MaterialPageRoute(builder: (context)=>UserGigPage()));
 
         }),
+            ListTile(
+                title: Text('Place Bid'),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>ProblemListPage()));
+
+                }),
+            ListTile(
+                title: Text('My Bid'),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>CurrentUserBids()));
+
+                }),
             ListTile(
               title: Text('Sign Out'),
               onTap: () {
@@ -93,23 +112,25 @@ class _perhomeState extends State<perhome> {
                     children: [
                       Text('Customer: ${order['userName']}'),
                       Text('Customer Phone number: ${order['phoneNumber']}'),
+                      Text('Details: ${order['details']}'),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () => _acceptOrder(orders[index].id),
+                            child: Text('Accept'),
+                          ),
+                          SizedBox(width: 8.0),
+                          ElevatedButton(
+                            onPressed: () => _rejectOrder(orders[index].id),
+                            child: Text('Reject'),
+                          ),
+                        ],
+                      ),
+
 
                     ],
                   ), // Assuming customer name is stored in the order
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => _acceptOrder(orders[index].id),
-                        child: Text('Accept'),
-                      ),
-                      SizedBox(width: 8.0),
-                      ElevatedButton(
-                        onPressed: () => _rejectOrder(orders[index].id),
-                        child: Text('Reject'),
-                      ),
-                    ],
-                  ),
                 ),
               );
             },

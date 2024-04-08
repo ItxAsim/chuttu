@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:chuttu/perfessional%20authentications/Document%20verification.dart';
-import 'package:chuttu/perfessional%20authentications/Perfessional%20Service%20Page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'Document verification.dart';
+import 'Perfessional Service Page.dart';
 import 'Proffessionalorderlist.dart';
 
 class ProfessionalDashboard extends StatefulWidget {
@@ -75,7 +75,6 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
     try {
       final status = await Permission.storage.request();
       if (status.isGranted) {
-        // Storage permission is granted, proceed with image upload
         final Reference ref = _storage.ref().child(
             'user_profile_pictures/${_auth.currentUser!.uid}/${image.path}');
         await ref.putFile(File(image.path));
@@ -85,7 +84,6 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
         });
         _updateUserProfile(downloadUrl);
       } else {
-        // Storage permission is not granted, show a message to the user
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.red,
@@ -103,7 +101,6 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
       );
     }
   }
-
 
   Future<void> _updateUserProfile(String url) async {
     try {
@@ -123,6 +120,7 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
       );
     }
   }
+
   Future<void> _pickImageFromSource(ImageSource source) async {
     try {
       final XFile? pickedFile = await _picker.pickImage(source: source);
@@ -139,6 +137,7 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
       );
     }
   }
+
   void _showImageSourceDialog() {
     showDialog(
       context: context,
@@ -170,22 +169,21 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
       },
     );
   }
+
   void _showImageFullScreen(BuildContext context, String imageUrl) {
-    // Use the Hero widget for smooth transition animation
     Navigator.push(
-      context, // Pass context directly
+      context,
       MaterialPageRoute(
-        builder: (context) => Hero(
-          tag: imageUrl, // Use the image URL as the tag
-          child: Scaffold(
-            appBar: AppBar(
-              title: Text('Image'),
-            ),
-            body: Center(
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover, // Adjust as needed
-              ),
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text('Image'),
+          ),
+          body: Center(
+            child: _imageUrl == null
+                ? CircularProgressIndicator()
+                : Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
             ),
           ),
         ),
@@ -215,12 +213,21 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
           }
 
           final professionalData = snapshot.data!;
-          final services = professionalData.get('services') as List<dynamic>?;
-          final name = professionalData.get('name') as String?;
-          final email = professionalData.get('email') as String?;
-          final phoneNumber = professionalData.get('phoneNumber') as String?;
-          var profileUrl = professionalData.get('profileImageUrl') as String?;
-          final status =professionalData.get('status') as String?;
+          final Map<String, dynamic>? data =
+          professionalData.data() as Map<String, dynamic>?;
+          List<dynamic>? services;
+
+          if (data != null && data.containsKey('services')) {
+            services = data['services'] as List<dynamic>?;
+          } else {
+            services = ['N/A'];
+          }
+
+          final name = data?['name'] as String? ?? 'N/A';
+          final email = data?['email'] as String? ?? 'N/A';
+          final phoneNumber = data?['phoneNumber'] as String? ?? 'N/A';
+          final profileUrl = data?['profileImageUrl'] as String?;
+          final status = data?['status'] as String? ?? 'N/A';
 
           return SingleChildScrollView(
             padding: EdgeInsets.all(16.0),
@@ -230,7 +237,8 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
                 if (profileUrl != null)
                   Center(
                     child: GestureDetector(
-                      onTap: () => _showImageFullScreen(context, profileUrl),
+                      onTap: () =>
+                          _showImageFullScreen(context, profileUrl),
                       child: CircleAvatar(
                         backgroundImage: NetworkImage(profileUrl),
                         radius: 75.0,
@@ -239,7 +247,11 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
                           child: FloatingActionButton(
                             onPressed: _showImageSourceDialog,
                             tooltip: 'Update Profile Picture',
-                            child: Icon(Icons.add,color: Colors.white,size: 30,),
+                            child: Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: 30,
+                            ),
                             backgroundColor: Colors.transparent,
                           ),
                         ),
@@ -256,7 +268,6 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
                   child: ListTile(
                     leading: Icon(Icons.person),
                     title: Text('Name: $name'),
-                  
                   ),
                 ),
                 Card(
@@ -272,25 +283,35 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
                   ),
                 ),
                 InkWell(
-                  onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>Documentverification())),
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Documentverification())),
                   child: Card(
-                    
                     child: ListTile(
-                      
-                      title: Text('Dcoument verfication'),
-                      trailing: status=='approved'?Icon(Icons.verified ,color: Colors.blueAccent,):Text("pending"),
+                      title: Text('Document verification'),
+                      trailing: status == 'approved'
+                          ? Icon(
+                        Icons.verified,
+                        color: Colors.blueAccent,
+                      )
+                          : Text("Pending"),
                     ),
                   ),
                 ),
                 SizedBox(height: 16.0),
                 InkWell(
-                  onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfessionalServicesPage())),
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ProfessionalServicesPage())),
                   child: ListTile(
-                    title: Text( 'Services',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                    title: Text(
+                      'Services',
+                      style:
+                      TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
                     trailing: Icon(Icons.add),
-                    
-                   
                   ),
                 ),
                 SizedBox(height: 8.0),
@@ -299,7 +320,7 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
                     shrinkWrap: true,
                     itemCount: services.length,
                     itemBuilder: (context, index) {
-                      final serviceName = services[index];
+                      final serviceName = services![index];
                       return Card(
                         child: ListTile(
                           title: Text(serviceName),
@@ -312,18 +333,35 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
                   'Orders',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                ElevatedButton(onPressed: ()=>{
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfessionalOrderList(status: 'In Progress')))
-                },
-                  child: Text('IN progress orders'),),
-                ElevatedButton(onPressed: ()=>{
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfessionalOrderList(status: 'Completed')))
-                },
+                ElevatedButton(
+                  onPressed: () => {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                ProfessionalOrderList(status: 'In Progress')))
+                  },
+                  child: Text('In progress orders'),
+                ),
+                ElevatedButton(
+                    onPressed: () => {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ProfessionalOrderList(
+                                      status: 'Completed')))
+                    },
                     child: Text('Completed orders')),
-                ElevatedButton(onPressed: ()=>{
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfessionalOrderList(status: 'Accepted')))
-                }, child: Text('Accepted orders'))
-
+                ElevatedButton(
+                    onPressed: () => {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ProfessionalOrderList(status: 'Accepted')))
+                    },
+                    child: Text('Accepted orders'))
               ],
             ),
           );

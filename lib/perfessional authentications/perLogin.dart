@@ -7,7 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../customer Authentication/ForgetPassword.dart';
-import '../home.dart';
+import '../customer/home.dart';
 class PerLoginPage extends StatefulWidget {
   @override
   _PerLoginPageState createState() => _PerLoginPageState();

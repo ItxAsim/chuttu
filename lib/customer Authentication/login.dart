@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'ForgetPassword.dart';
 import 'Signinwithphonenumber.dart';
-import '../home.dart';
+import '../customer/home.dart';
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();

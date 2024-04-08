@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
-
 class MapSelectionPage extends StatefulWidget {
   final Function(LatLng) onLocationSelected;
 
@@ -18,6 +17,7 @@ class _MapSelectionPageState extends State<MapSelectionPage> {
   LocationData? currentLocation;
 
   Location location = Location();
+  bool showDoneButton = false;
 
   @override
   void initState() {
@@ -31,6 +31,7 @@ class _MapSelectionPageState extends State<MapSelectionPage> {
       setState(() {
         currentLocation = userLocation;
         selectedLocation = LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
+        showDoneButton = true; // Show the "Done" button when the location is retrieved
       });
     } catch (e) {
       print('Error getting location: $e');
@@ -48,6 +49,12 @@ class _MapSelectionPageState extends State<MapSelectionPage> {
       selectedLocation = location;
     });
     widget.onLocationSelected(location);
+    Navigator.pop(context);
+  }
+
+  void _onDoneButtonPressed() {
+    // Pass the selected location back to the previous page
+    widget.onLocationSelected(selectedLocation);
     Navigator.pop(context);
   }
 
@@ -76,6 +83,12 @@ class _MapSelectionPageState extends State<MapSelectionPage> {
           : Center(
         child: CircularProgressIndicator(),
       ),
+      floatingActionButton: showDoneButton
+          ? FloatingActionButton(
+        onPressed: _onDoneButtonPressed,
+        child: Icon(Icons.done),
+      )
+          : null,
     );
   }
 }

@@ -31,6 +31,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     String location = '';
     String title='';
     String price='';
+    String details='';
 
 
 
@@ -60,6 +61,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               TextFormField(
                 decoration: InputDecoration(labelText: 'Location'),
                 onChanged: (value) => location = value, // Update location when user types
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Details'),
+                onChanged: (value) => details = value, // Update location when user types
               ),
               SizedBox(height: 20),
               ElevatedButton(
@@ -93,6 +98,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       'location': location,
                       'title': title,
                       'price': price,
+                      'details':details,
                       'status':'pending',
                       'professionalId': widget.professionalId,
                       'gigindex': widget.gigindex,
