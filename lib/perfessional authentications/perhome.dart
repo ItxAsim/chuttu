@@ -1,4 +1,5 @@
 import 'package:chuttu/perfessional%20authentications/MyBids.dart';
+import 'package:chuttu/perfessional%20authentications/Userlist.dart';
 import 'package:chuttu/perfessional%20authentications/bottomNavigationPerfessional.dart';
 import 'package:chuttu/perfessional%20authentications/listProblem.dart';
 import 'package:chuttu/perfessional%20authentications/usergig.dart';
@@ -64,6 +65,13 @@ class _perhomeState extends State<perhome> {
                 title: Text('Place Bid'),
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context)=>ProblemListPage()));
+
+                }),
+            ListTile(
+                title: Text('Chat'),
+                onTap: () {
+                  String professionalId=FirebaseAuth.instance.currentUser!.uid;
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>UserListScreen(professionalId:professionalId )));
 
                 }),
             ListTile(

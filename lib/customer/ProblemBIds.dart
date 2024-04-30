@@ -1,5 +1,7 @@
+import 'package:chuttu/customer/ChatScreen.dart';
 import 'package:chuttu/customer/orderdetails.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ProblemBids extends StatefulWidget {
@@ -12,15 +14,20 @@ class ProblemBids extends StatefulWidget {
 }
 
 class _ProblemBidsState extends State<ProblemBids> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   late Stream<List<DocumentSnapshot>> _bidsStream;
+  late final User? user;
+
 
   @override
   void initState() {
     super.initState();
     _fetchBids();
+    user=_auth.currentUser;
   }
 
   void _fetchBids() {
+
     _bidsStream = FirebaseFirestore.instance
         .collection('bids')
         .where('problemId', isEqualTo: widget.problemId)
@@ -50,10 +57,6 @@ class _ProblemBidsState extends State<ProblemBids> {
     });
   }
 
-  void _openChat(DocumentSnapshot bid) {
-    // Implement chat functionality here
-    print('Chat with professional: ${bid['professionalId']}');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +124,8 @@ class _ProblemBidsState extends State<ProblemBids> {
                     ),
                     SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: () => _openChat(bid),
+                      onPressed: () => Navigator.push(context,
+                          MaterialPageRoute(builder: (context)=>ChatScreen(userId: user!.uid, professionalId: professionalId),)),
                       child: Text('Chat'),
                     ),
                   ],
