@@ -1,13 +1,10 @@
-import 'package:chuttu/customer%20Authentication/signuppage.dart';
-import 'package:chuttu/perfessional%20authentications/Perfessional%20Service%20Page.dart';
+
 import 'package:chuttu/perfessional%20authentications/perSignunp.dart';
 import 'package:chuttu/perfessional%20authentications/perhome.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../customer Authentication/ForgetPassword.dart';
-import '../customer/home.dart';
 class PerLoginPage extends StatefulWidget {
   @override
   _PerLoginPageState createState() => _PerLoginPageState();
@@ -67,18 +64,19 @@ class _PerLoginPageState extends State<PerLoginPage> {
               height: screenHeight, // Match the screen height
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage("images/new.png"),
+                  image: AssetImage("images/designbg.png"),
                   fit: BoxFit.fill, // Stretch to fill the entire screen
                 ),
               ),
             ),
+            Image.asset('images/Logo.png'),
 
             Center(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    SizedBox(height: 150),
-                    Text("LOGIN as perfessional  ",style: GoogleFonts.croissantOne(
+                    SizedBox(height: 125),
+                    Text("LOGIN as professional  ",style: GoogleFonts.croissantOne(
                       fontStyle:FontStyle.italic,
                       fontSize: 30,
                     ),),

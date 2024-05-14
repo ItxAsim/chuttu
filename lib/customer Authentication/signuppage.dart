@@ -72,17 +72,17 @@ class _SignupPageState extends State<SignupPage> {
               height: screenHeight, // Match the screen height
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage("images/new.png"),
+                  image: AssetImage("images/designbg.png"),
                   fit: BoxFit.fill, // Stretch to fill the entire screen
                 ),
               ),
             ),
-
+            Image.asset('images/Logo.png'),
             Center(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    SizedBox(height: 150),
+                    SizedBox(height: 255),
                     Text("Create an account  ",style: GoogleFonts.croissantOne(
                       fontStyle:FontStyle.italic,
                       fontSize: 30,

@@ -13,8 +13,8 @@ class Selectionpage extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("images/new.png"),
-                fit: BoxFit.fill, // Stretch to fill the entire screen
+                image: AssetImage("images/designbg.png"),
+                fit: BoxFit.cover, // Stretch to fill the entire screen
               ),
             ),
           ),

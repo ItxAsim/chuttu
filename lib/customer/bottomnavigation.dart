@@ -1,12 +1,13 @@
 
 
-import 'package:chuttu/createPost.dart';
+
+import 'package:chuttu/customer/Services.dart';
 import 'package:chuttu/customer/Uploadproblem.dart';
 
 import 'package:chuttu/customer/userprofile.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
-import 'Home.dart';
+
 
 
 class bottomnavigation extends StatefulWidget {
@@ -33,7 +34,7 @@ class _bottomnavigationState extends State<bottomnavigation> {
       case 0:
         Navigator.push(
           context,
-         MaterialPageRoute(builder: (context) => myhome()),
+         MaterialPageRoute(builder: (context) => ApprovedGigsPage()),
        );
        break;
         case 1:

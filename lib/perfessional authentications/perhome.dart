@@ -36,7 +36,7 @@ class _perhomeState extends State<perhome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("HOME"),
+        title: Text("Orders"),
 
       ),
       drawer: Drawer(

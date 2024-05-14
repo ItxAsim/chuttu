@@ -62,6 +62,7 @@ dependencies:
   latlong2: ^0.9.1
   rxdart: 0.27.7
   connectivity_plus: ^2.3.6
+  flutter_animate: ^4.5.0
 
 dev_dependencies:
   flutter_test:
@@ -95,6 +96,8 @@ flutter:
     - images/bgcard.jpg
     - images/webLogin.jpg
     - images/blur.jpg
+    - images/Logo.png
+    - images/designbg.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

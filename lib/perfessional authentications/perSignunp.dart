@@ -129,20 +129,20 @@ class _PerSignupPageState extends State<PerSignupPage> {
               height: screenHeight, // Match the screen height
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage("images/new.png"),
+                  image: AssetImage("images/designbg.png"),
                   fit: BoxFit.fill, // Stretch to fill the entire screen
                 ),
               ),
             ),
-
+            Image.asset('images/Logo.png'),
             Center(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    SizedBox(height: 130),
-                    Text("Create an  Perfessional account",style: GoogleFonts.croissantOne(
+                    SizedBox(height: 255),
+                    Text("Create an  Professional account",style: GoogleFonts.croissantOne(
                       fontStyle:FontStyle.italic,
-                      fontSize: 23,
+                      fontSize: 20,
                     ),),
                     Padding(
                       padding: EdgeInsets.all(16.0),

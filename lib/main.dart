@@ -1,5 +1,6 @@
 
 import 'package:chuttu/Admin/AdminLoginPage.dart';
+import 'package:chuttu/Splash%20screen.dart';
 import 'package:chuttu/perfessional%20authentications/perSignunp.dart';
 import 'package:chuttu/selctionpage.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,6 +19,6 @@ if(kIsWeb)
   ));
 else
   runApp( MaterialApp(
-      home:Selectionpage(),
+      home:SplashScreen(),
   ));
 }
