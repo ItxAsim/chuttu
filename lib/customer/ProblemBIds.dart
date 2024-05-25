@@ -1,8 +1,10 @@
-import 'package:chuttu/customer/ChatScreen.dart';
+
 import 'package:chuttu/customer/orderdetails.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import '../chatScreen.dart';
 
 class ProblemBids extends StatefulWidget {
   final String problemId;
@@ -17,17 +19,17 @@ class _ProblemBidsState extends State<ProblemBids> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late Stream<List<DocumentSnapshot>> _bidsStream;
   late final User? user;
-
+  late final String professionalName;
+  late final String Profileimage;
 
   @override
   void initState() {
     super.initState();
     _fetchBids();
-    user=_auth.currentUser;
+    user = _auth.currentUser;
   }
 
   void _fetchBids() {
-
     _bidsStream = FirebaseFirestore.instance
         .collection('bids')
         .where('problemId', isEqualTo: widget.problemId)
@@ -38,17 +40,16 @@ class _ProblemBidsState extends State<ProblemBids> {
   void _acceptBid(DocumentSnapshot bid) {
     FirebaseFirestore.instance
         .collection('bids')
-        .doc(bid.id) // Assuming bid document has an id field
+        .doc(bid.id)
         .update({'status': 'accepted'})
         .then((_) {
-          FirebaseFirestore.instance.collection('problems').doc(widget.problemId).update({'status':'accepted'});
-      // Navigate to order creation screen
+      FirebaseFirestore.instance.collection('problems').doc(widget.problemId).update({'status': 'accepted'});
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => OrderDetailsScreen(
-            professionalId: bid['professionalId'], gigindex: 0,
-            // Pass any other necessary data to the order creation screen
+            professionalId: bid['professionalId'],
+            gigindex: 0,
           ),
         ),
       );
@@ -56,7 +57,6 @@ class _ProblemBidsState extends State<ProblemBids> {
       print('Error updating bid status: $error');
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -91,10 +91,7 @@ class _ProblemBidsState extends State<ProblemBids> {
 
               return ListTile(
                 title: FutureBuilder<DocumentSnapshot>(
-                  future: FirebaseFirestore.instance
-                      .collection('perfessionals') // Assuming professionals are stored in a 'users' collection
-                      .doc(professionalId)
-                      .get(),
+                  future: FirebaseFirestore.instance.collection('perfessionals').doc(professionalId).get(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Text('Loading...');
@@ -105,11 +102,13 @@ class _ProblemBidsState extends State<ProblemBids> {
                     }
 
                     final professionalData = snapshot.data!;
-                    final String professionalName = professionalData['name'];
+                    professionalName = professionalData['name'];
+                    Profileimage=professionalData['profileImageUrl'];
                     return Text('Professional: $professionalName');
                   },
                 ),
                 subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Price: \$${price.toStringAsFixed(2)}'),
                     Text(description),
@@ -124,8 +123,17 @@ class _ProblemBidsState extends State<ProblemBids> {
                     ),
                     SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: () => Navigator.push(context,
-                          MaterialPageRoute(builder: (context)=>ChatScreen(userId: user!.uid, professionalId: professionalId),)),
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatScreen(
+                            senderId: user!.uid,
+                            receiverId: professionalId,
+                            receiverName: professionalName, // Pass receiver name
+                            receiverProfileImage: Profileimage, // Pass receiver profile image
+                          ),
+                        ),
+                      ),
                       child: Text('Chat'),
                     ),
                   ],

@@ -1,38 +1,47 @@
-
+import 'package:chuttu/chatScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:rxdart/rxdart.dart';
 
-import '../chatScreen.dart';
-
-
-class UserListScreen extends StatefulWidget {
-  final String professionalId;
-
-  UserListScreen({required this.professionalId});
+class UserListScreencustumer extends StatefulWidget {
+  const UserListScreencustumer({Key? key}) : super(key: key);
 
   @override
-  _UserListScreenState createState() => _UserListScreenState();
+  _UserListScreencustumerState createState() => _UserListScreencustumerState();
 }
 
-class _UserListScreenState extends State<UserListScreen> {
+class _UserListScreencustumerState extends State<UserListScreencustumer> {
   late Stream<List<Map<String, dynamic>>> _userListStream;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late final User? user;
 
   @override
   void initState() {
     super.initState();
-    _userListStream = _firestore
-        .collection('messages')
-        .where('receiver', isEqualTo: widget.professionalId)
-        .snapshots()
-        .asyncMap((snapshot) async {
+    user = _auth.currentUser;
+
+    _userListStream = CombineLatestStream.list([
+      _firestore
+          .collection('messages')
+          .where('sender', isEqualTo: user?.uid)
+          .snapshots(),
+      _firestore
+          .collection('messages')
+          .where('receiver', isEqualTo: user?.uid)
+          .snapshots()
+    ]).asyncMap((snapshot) async {
       Set<String> userIds = {};
       List<Map<String, dynamic>> usersData = [];
-      for (var doc in snapshot.docs) {
-        final userId = doc['sender'];
+
+      List<QueryDocumentSnapshot> allDocs = snapshot.expand((querySnapshot) => querySnapshot.docs).toList();
+
+      for (var doc in allDocs) {
+        final userId = doc['receiver'] == user?.uid ? doc['sender'] : doc['receiver'];
         if (!userIds.contains(userId)) {
           userIds.add(userId);
-          final userSnapshot = await _firestore.collection('users').doc(userId).get();
+          final userSnapshot = await _firestore.collection('perfessionals').doc(userId).get();
           if (userSnapshot.exists) {
             final userData = userSnapshot.data() as Map<String, dynamic>;
             usersData.add({
@@ -40,7 +49,6 @@ class _UserListScreenState extends State<UserListScreen> {
               'name': userData['name'],
               'email': userData['email'],
               'profileImageUrl': userData['profileImageUrl'],
-              // Add other user data fields you want to include
             });
           }
         }
@@ -51,20 +59,25 @@ class _UserListScreenState extends State<UserListScreen> {
 
   Widget _buildUserItem(Map<String, dynamic> userData) {
     return ListTile(
-      title: Row(children: [
-        CircleAvatar(
-          backgroundImage: NetworkImage(userData['profileImageUrl']),
-        ),
-        Text(userData['name'])]),
+      title: Row(
+        children: [
+          CircleAvatar(
+            backgroundImage: NetworkImage(userData['profileImageUrl']),
+          ),
+          SizedBox(width: 10),
+          Text(userData['name']),
+        ],
+      ),
       subtitle: Text(userData['email']),
-      // Add other user data fields as needed
       onTap: () {
-        // Navigate to chat screen with this user
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ChatScreen(senderId:widget.professionalId , receiverId:userData['userId'], receiverName: userData['name'], receiverProfileImage: userData['profileImageUrl'],
-
+            builder: (context) => ChatScreen(
+              senderId: user!.uid,
+              receiverId: userData['userId'],
+              receiverName: userData['name'], // Pass receiver name
+              receiverProfileImage: userData['profileImageUrl'], // Pass receiver profile image URL
             ),
           ),
         );
@@ -99,4 +112,3 @@ class _UserListScreenState extends State<UserListScreen> {
     );
   }
 }
-

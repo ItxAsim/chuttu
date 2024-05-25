@@ -1,11 +1,13 @@
+import 'package:chuttu/customer/chatlist.dart';
 import 'package:chuttu/customer/orderdetails.dart';
 import 'package:chuttu/customer/proffesionalprofile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'Gigdetails.dart';
 import 'UserUploadedProblem.dart';
-import 'bottomnavigation.dart';
+
 
 class ApprovedGigsPage extends StatefulWidget {
   @override
@@ -16,7 +18,7 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
   int _selectedIndex = 0;
   final User? _user = FirebaseAuth.instance.currentUser;
   late final String _userId;
-
+  late  String proffessionlId;
   @override
   void initState() {
     super.initState();
@@ -85,6 +87,12 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
             },
           ),
           ListTile(
+            title: Text("Chat"),
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>UserListScreencustumer()));
+            },
+          ),
+          ListTile(
             title: const Text('Sign Out'),
             onTap: () {
               _signOut(context);
@@ -95,7 +103,6 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
       ),
     );
   }
-
   Widget _buildBody() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('perfessionals').snapshots(),
@@ -109,98 +116,93 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
 
         final List<DocumentSnapshot> professionals = snapshot.data!.docs;
 
-        return GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        return SingleChildScrollView(
+          child: GridView.count(
+            physics: NeverScrollableScrollPhysics(), // Disable scrolling of GridView
+            shrinkWrap: true, // Wrap the GridView in a SingleChildScrollView
             crossAxisCount: 2,
-            childAspectRatio: 0.7,
             crossAxisSpacing: 8.0,
             mainAxisSpacing: 8.0,
+            children: professionals.expand((professional) {
+              final professionalData = professional.data() as Map<String, dynamic>;
+              final List<dynamic> gigs = professionalData['gigs'] ?? [];
+              proffessionlId=professionalData['userId'];
+              final List<dynamic> approvedGigs = gigs.where((gig) => gig['gigstatus'] == 'Approved').toList();
+              return _buildGigCards(context, approvedGigs);
+            }).toList(),
           ),
-          itemCount: professionals.length,
-          itemBuilder: (context, index) {
-            final professional = professionals[index];
-            final professionalData = professional.data() as Map<String, dynamic>;
-            final List<dynamic> gigs = professionalData['gigs'] ?? [];
-
-            // Filter out only approved gigs
-            final List<dynamic> approvedGigs = gigs.where((gig) => gig['gigstatus'] == 'Approved').toList();
-
-            if (approvedGigs.isEmpty) {
-              // If there are no approved gigs, don't show anything for this professional
-              return const SizedBox.shrink();
-            }
-
-            return Wrap(
-                children: [for (var i = 0; i < approvedGigs.length; i++)
-                  _buildGigCard(context, professional.id, i, approvedGigs[i]),
-                ]
-            );
-          },
         );
       },
     );
   }
 
-  Widget _buildGigCard(BuildContext context, String professionalId, int gigId, Map<String, dynamic> gig) {
-    return Card(
+  List<Widget> _buildGigCards(BuildContext context, List<dynamic> approvedGigs) {
+    List<Widget> gigCards = [];
 
-      child: ListTile(
-        title: Text(gig['title'],style: TextStyle(
-          fontWeight: FontWeight.bold,
-        ),),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 150,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: (gig['gigimages'] as List<dynamic>?)?.length ?? 0,
-                itemBuilder: (context, imgIndex) {
-                  final imageUrl = gig['gigimages'][imgIndex];
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: Image.network(
-                      imageUrl,
-                      width: 150,
-                      height: 150,
-                      fit: BoxFit.cover,
+    for (int i = 0; i < approvedGigs.length; i++) {
+      final gig = approvedGigs[i];
+      final List<dynamic> gigImages = gig['gigimages'] ?? [];
+
+      gigCards.add(
+        GestureDetector(
+          onTap: () {
+            _showGigDetails(context, gig, i); // Pass the gig index
+          },
+          child: SingleChildScrollView(
+            child: Card(
+              margin: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    gig['title'],
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
                     ),
-                  );
-                },
+                  ),
+                  SizedBox(
+                    height: 131,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: gigImages.length,
+                      itemBuilder: (context, imgIndex) {
+                        final imageUrl = gigImages[imgIndex];
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Image.network(
+                            imageUrl,
+                            width: 140,
+                            height: 130,
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Text('Price: ${gig['price']} Rupees'),
+                ],
               ),
             ),
-            /* Text('Description: ${gig['description']}'),*/
-            Row(
-              children: [
-                Text('Price: ${gig['price']} Rupees'),
-                /*     SizedBox(width: 10,),
-                Text('Location: ${gig['location']}',),*/
-              ],
-            ),
-
-            /* const SizedBox(height: 8.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () => _orderGig(context, professionalId, gigId),
-                  child: const Text('Order'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _viewProfile(context, professionalId),
-                  child: const Text('Profile view'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8.0),
-            // Display images*/
-
-          ],
+          ),
         ),
+      );
+    }
+
+    return gigCards;
+  }
+
+
+  void _showGigDetails(BuildContext context, Map<String, dynamic> gig, int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GigDetailsPage(gig: gig, proffessionalId: proffessionlId,  gigindex: index,),
       ),
     );
   }
+
+
+
 
   Widget _buildBottomNavigationBar() {
     return BottomNavigationBar(
@@ -224,22 +226,5 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
     );
   }
 
-  void _orderGig(BuildContext context, String professionalId, int gigId) async {
-    try {
-      // Handle order gig logic here
-      Navigator.push(context, MaterialPageRoute(builder: (context) => OrderDetailsScreen(professionalId: professionalId, gigindex: gigId, )));
-    } catch (e) {
-      print('Error ordering gig: $e');
-      // Handle order gig errors
-    }
-  }
 
-  void _viewProfile(BuildContext context, String professionalId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProfessionalProfile(professionalId: professionalId),
-      ),
-    );
-  }
 }

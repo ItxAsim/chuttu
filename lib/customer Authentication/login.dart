@@ -1,5 +1,5 @@
 import 'package:chuttu/customer%20Authentication/signuppage.dart';
-import 'package:chuttu/customer/Services.dart';
+import 'package:chuttu/customer/Home.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
