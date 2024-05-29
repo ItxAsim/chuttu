@@ -121,6 +121,7 @@ class _perhomeState extends State<perhome> {
                       Text('Customer: ${order['userName']}'),
                       Text('Customer Phone number: ${order['phoneNumber']}'),
                       Text('Details: ${order['details']}'),
+                      Text('payment: ${order['payment']}'??''),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

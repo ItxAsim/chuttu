@@ -63,6 +63,8 @@ dependencies:
   rxdart: 0.27.7
   connectivity_plus: ^2.3.6
   flutter_animate: ^4.5.0
+  flutter_stripe: ^10.1.1
+
 
 dev_dependencies:
   flutter_test:
