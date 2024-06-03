@@ -23,6 +23,7 @@ class _SignupPageState extends State<SignupPage> {
   TextEditingController _email = TextEditingController();
   TextEditingController _password = TextEditingController();
   String _Profile_url='';
+  bool _obscureText=true;
 
   void _createAccount() async {
     if (_formKey.currentState!.validate()) {
@@ -111,13 +112,23 @@ class _SignupPageState extends State<SignupPage> {
                             SizedBox(height: 16.0),
                             TextFormField(
                               controller: _password,
-                              obscureText: true,
+                              obscureText: _obscureText,
                               style: TextStyle(
                                   color: Colors.black54
                               ),
                               decoration: InputDecoration(
                                   icon: Icon(Icons.lock),
                                   labelText: 'Password',
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscureText ? Icons.visibility : Icons.visibility_off,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscureText = !_obscureText;
+                                      });
+                                    },
+                                  ),
                                   border:  OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10.0),)
 

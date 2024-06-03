@@ -1,6 +1,3 @@
-
-
-
 import 'package:chuttu/customer/Home.dart';
 import 'package:chuttu/customer/Uploadproblem.dart';
 
@@ -23,7 +20,6 @@ class bottomnavigation extends StatefulWidget {
 
 class _bottomnavigationState extends State<bottomnavigation> {
   @override
-  int _selectedIndex = 0;
 
 
 
@@ -70,6 +66,9 @@ class _bottomnavigationState extends State<bottomnavigation> {
         child: BottomNavigationBar(
           items: widget.items,
           currentIndex:  widget.selectedIndex,
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.grey,
+          backgroundColor: Colors.blueGrey,
           onTap: _onItemTapped,
         ),
       ),

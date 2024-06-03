@@ -68,6 +68,9 @@ class _bottomnavigationState extends State<Perbottomnavigation> {
         child: BottomNavigationBar(
           items: widget.items,
           currentIndex:  widget.selectedIndex,
+          backgroundColor: Colors.blueGrey,
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.grey,
           onTap: _onItemTapped,
         ),
       ),

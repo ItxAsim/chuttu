@@ -234,7 +234,7 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (profileUrl != null)
+                profileUrl != null?
                   Center(
                     child: GestureDetector(
                       onTap: () =>
@@ -257,7 +257,26 @@ class _ProfessionalDashboardState extends State<ProfessionalDashboard> {
                         ),
                       ),
                     ),
+                  ): Center(
+                  child: CircleAvatar(
+                    backgroundImage: AssetImage('images/placeholder.jpeg'),
+                    radius: 75.0,
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: FloatingActionButton(
+                        onPressed: _showImageSourceDialog,
+                        tooltip: 'Update Profile Picture',
+                        child: Icon(
+                          Icons.add,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                        backgroundColor: Colors.transparent,
+                      ),
+                    ),
                   ),
+                ),
+
                 SizedBox(height: 16.0),
                 Text(
                   'Profile Information',

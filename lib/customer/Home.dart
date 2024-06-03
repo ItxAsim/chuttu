@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'Gigdetails.dart';
 import 'UserUploadedProblem.dart';
-
+import 'bottomnavigation.dart';
 
 class ApprovedGigsPage extends StatefulWidget {
   @override
@@ -18,11 +18,21 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
   int _selectedIndex = 0;
   final User? _user = FirebaseAuth.instance.currentUser;
   late final String _userId;
-  late  String proffessionlId;
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _userId = _user?.uid ?? '';
+    setState(() {
+      _selectedIndex = 0;
+    });
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text;
+      });
+    });
   }
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -40,13 +50,81 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chuttu'),
+        backgroundColor: Colors.blueGrey,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: CustomSearchDelegate(),
+              );
+            },
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48.0),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.white70,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+              ),
+            ),
+          ),
+        ),
       ),
       drawer: _buildDrawer(),
-      body: _buildBody(),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      body: Stack(
+        children: [
+          Container(
+            width: screenWidth, // Match the screen width
+            height: screenHeight, // Match the screen height
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("images/designbg.png"),
+                fit: BoxFit.fill, // Stretch to fill the entire screen
+              ),
+            ),
+          ),
+          Column(
+            children: [
+              _buildTitlesList(),
+              Expanded(child: _buildBody()),
+            ],
+          ),
+        ],
+      ),
+      bottomNavigationBar: bottomnavigation(
+        items: [
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home),
+            label: 'HOME',
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.add),
+            label: 'ADD POST',
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person),
+            label: 'PROFILE',
+          ),
+        ],
+        selectedIndex: _selectedIndex,
+      ),
     );
   }
 
@@ -57,7 +135,7 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
         children: <Widget>[
           DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: Colors.blueGrey,
             ),
             child: const Text(
               'Menu',
@@ -78,7 +156,7 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
             },
           ),
           ListTile(
-            title: const Text('My uploaded Probelms'),
+            title: const Text('My uploaded Problems'),
             onTap: () {
               Navigator.push(
                 context,
@@ -88,8 +166,8 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
           ),
           ListTile(
             title: Text("Chat"),
-            onTap: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>UserListScreencustumer()));
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => UserListScreencustumer()));
             },
           ),
           ListTile(
@@ -103,6 +181,62 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
       ),
     );
   }
+
+  Widget _buildTitlesList() {
+    return Container(
+      height: 50,
+      child: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('perfessionals').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          final List<DocumentSnapshot> professionals = snapshot.data!.docs;
+          final List<String> gigTitles = [];
+
+          professionals.forEach((professional) {
+            final professionalData = professional.data() as Map<String, dynamic>;
+            final List<dynamic>? gigs = professionalData['gigs'];
+            if (gigs != null) {
+              final List<dynamic> approvedGigs = gigs.where((gig) => gig['gigstatus'] == 'Approved').toList();
+              approvedGigs.forEach((gig) {
+                final gigTitle = gig['title']?.toString() ?? '';
+                gigTitles.add(gigTitle);
+              });
+            }
+          });
+
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: gigTitles.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _searchQuery = gigTitles[index];
+                  });
+                },
+                child: Card(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: Text(
+                      gigTitles[index],
+                      style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildBody() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('perfessionals').snapshots(),
@@ -115,6 +249,24 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
         }
 
         final List<DocumentSnapshot> professionals = snapshot.data!.docs;
+        final List<Widget> gigCards = [];
+
+        professionals.forEach((professional) {
+          final professionalData = professional.data() as Map<String, dynamic>;
+          final List<dynamic>? gigs = professionalData['gigs'];
+          final String professionalId = professionalData['userId']?.toString() ?? '';
+          if (gigs != null) {
+            final List<dynamic> approvedGigs = gigs.where((gig) => gig['gigstatus'] == 'Approved').toList();
+
+            final filteredGigs = approvedGigs.where((gig) {
+              final gigTitle = gig['title']?.toString().toLowerCase() ?? '';
+              final searchQuery = _searchQuery.toLowerCase();
+              return gigTitle.contains(searchQuery);
+            }).toList();
+
+            gigCards.addAll(_buildGigCards(context, filteredGigs, professionalId));
+          }
+        });
 
         return SingleChildScrollView(
           child: GridView.count(
@@ -123,30 +275,23 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
             crossAxisCount: 2,
             crossAxisSpacing: 8.0,
             mainAxisSpacing: 8.0,
-            children: professionals.expand((professional) {
-              final professionalData = professional.data() as Map<String, dynamic>;
-              final List<dynamic> gigs = professionalData['gigs'] ?? [];
-              proffessionlId=professionalData['userId'];
-              final List<dynamic> approvedGigs = gigs.where((gig) => gig['gigstatus'] == 'Approved').toList();
-              return _buildGigCards(context, approvedGigs);
-            }).toList(),
+            children: gigCards,
           ),
         );
       },
     );
   }
 
-  List<Widget> _buildGigCards(BuildContext context, List<dynamic> approvedGigs) {
+  List<Widget> _buildGigCards(BuildContext context, List<dynamic> approvedGigs, String professionalId) {
     List<Widget> gigCards = [];
 
     for (int i = 0; i < approvedGigs.length; i++) {
       final gig = approvedGigs[i];
-      final List<dynamic> gigImages = gig['gigimages'] ?? [];
-
+      final List<dynamic>? gigImages = gig['gigimages'];
       gigCards.add(
         GestureDetector(
           onTap: () {
-            _showGigDetails(context, gig, i); // Pass the gig index
+            _showGigDetails(context, gig, professionalId, i); // Pass the gig index and professionalId
           },
           child: SingleChildScrollView(
             child: Card(
@@ -155,7 +300,7 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    gig['title'],
+                    gig['title']?.toString() ?? '',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
@@ -164,22 +309,24 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
                     height: 131,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: gigImages.length,
+                      itemCount: gigImages?.length ?? 0,
                       itemBuilder: (context, imgIndex) {
-                        final imageUrl = gigImages[imgIndex];
+                        final imageUrl = gigImages?[imgIndex]?.toString();
                         return Padding(
                           padding: const EdgeInsets.only(right: 8.0),
-                          child: Image.network(
+                          child: imageUrl != null
+                              ? Image.network(
                             imageUrl,
                             width: 140,
                             height: 130,
                             fit: BoxFit.cover,
-                          ),
+                          )
+                              : Container(),
                         );
                       },
                     ),
                   ),
-                  Text('Price: ${gig['price']} Rupees'),
+                  Text('Price: ${gig['price']?.toString() ?? ''} Rupees'),
                 ],
               ),
             ),
@@ -191,40 +338,180 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
     return gigCards;
   }
 
-
-  void _showGigDetails(BuildContext context, Map<String, dynamic> gig, int index) {
+  void _showGigDetails(BuildContext context, Map<String, dynamic> gig, String professionalId, int index) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => GigDetailsPage(gig: gig, proffessionalId: proffessionlId,  gigindex: index,),
+        builder: (context) => GigDetailsPage(gig: gig, proffessionalId: professionalId, gigindex: index,),
       ),
     );
   }
+}
 
+class CustomSearchDelegate extends SearchDelegate {
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
 
-
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      items: [
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.person),
-          label: 'HOME',
-        ),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.add),
-          label: 'ADD POST',
-        ),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.person),
-          label: 'PROFILE',
-        ),
-      ],
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.grey,
-      currentIndex: _selectedIndex,
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+      },
     );
   }
 
+  @override
+  Widget buildResults(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('perfessionals').snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
 
+        final List<DocumentSnapshot> professionals = snapshot.data!.docs;
+        final List<Widget> gigCards = [];
+
+        professionals.forEach((professional) {
+          final professionalData = professional.data() as Map<String, dynamic>;
+          final List<dynamic>? gigs = professionalData['gigs'];
+          final String professionalId = professionalData['userId']?.toString() ?? '';
+          if (gigs != null) {
+            final List<dynamic> approvedGigs = gigs.where((gig) => gig['gigstatus'] == 'Approved').toList();
+
+            final filteredGigs = approvedGigs.where((gig) {
+              final gigTitle = gig['title']?.toString().toLowerCase() ?? '';
+              final searchQuery = query.toLowerCase();
+              return gigTitle.contains(searchQuery);
+            }).toList();
+
+            gigCards.addAll(_buildGigCards(context, filteredGigs, professionalId));
+          }
+        });
+
+        return ListView(
+          children: gigCards,
+        );
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('perfessionals').snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        final List<DocumentSnapshot> professionals = snapshot.data!.docs;
+        final List<Widget> suggestionList = [];
+
+        professionals.forEach((professional) {
+          final professionalData = professional.data() as Map<String, dynamic>;
+          final List<dynamic>? gigs = professionalData['gigs'];
+          final String professionalId = professionalData['userId']?.toString() ?? '';
+          if (gigs != null) {
+            final List<dynamic> approvedGigs = gigs.where((gig) => gig['gigstatus'] == 'Approved').toList();
+
+            final filteredGigs = approvedGigs.where((gig) {
+              final gigTitle = gig['title']?.toString().toLowerCase() ?? '';
+              final searchQuery = query.toLowerCase();
+              return gigTitle.contains(searchQuery);
+            }).toList();
+
+            suggestionList.addAll(_buildGigCards(context, filteredGigs, professionalId));
+          }
+        });
+
+        return ListView(
+          children: suggestionList,
+        );
+      },
+    );
+  }
+
+  List<Widget> _buildGigCards(BuildContext context, List<dynamic> approvedGigs, String professionalId) {
+    List<Widget> gigCards = [];
+
+    for (int i = 0; i < approvedGigs.length; i++) {
+      final gig = approvedGigs[i];
+      final List<dynamic>? gigImages = gig['gigimages'];
+
+      gigCards.add(
+        GestureDetector(
+          onTap: () {
+            _showGigDetails(context, gig, professionalId, i); // Pass the gig index and professionalId
+          },
+          child: SingleChildScrollView(
+            child: Card(
+              margin: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    gig['title']?.toString() ?? '',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 131,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: gigImages?.length ?? 0,
+                      itemBuilder: (context, imgIndex) {
+                        final imageUrl = gigImages?[imgIndex]?.toString();
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: imageUrl != null
+                              ? Image.network(
+                            imageUrl,
+                            width: 140,
+                            height: 130,
+                            fit: BoxFit.cover,
+                          )
+                              : Container(),
+                        );
+                      },
+                    ),
+                  ),
+                  Text('Price: ${gig['price']?.toString() ?? ''} Rupees'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return gigCards;
+  }
+
+  void _showGigDetails(BuildContext context, Map<String, dynamic> gig, String professionalId, int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GigDetailsPage(gig: gig, proffessionalId: professionalId, gigindex: index),
+      ),
+    );
+  }
 }

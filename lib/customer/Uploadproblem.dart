@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:path/path.dart' as Path;
 
+import 'bottomnavigation.dart';
+
 class ProblemUploadScreen extends StatefulWidget {
   @override
   _ProblemUploadScreenState createState() => _ProblemUploadScreenState();
@@ -18,6 +20,17 @@ class _ProblemUploadScreenState extends State<ProblemUploadScreen> {
   String _problemTitle = '';
   String _problemDescription = '';
   bool _uploading = false;
+  int _selectedIndex=1;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    setState(() {
+      _selectedIndex=1;
+
+    });
+
+  }
 
   Future getImage(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
@@ -113,77 +126,130 @@ class _ProblemUploadScreenState extends State<ProblemUploadScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      appBar: AppBar(title: Text('Upload Problem')),
-      body: _uploading
-          ? Center(
-        child: CircularProgressIndicator(),
-      )
-          : SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Title'),
-                onChanged: (value) {
-                  setState(() {
-                    _problemTitle = value;
-                  });
-                },
+      appBar: AppBar(title: Text('Upload Problem'),
+      backgroundColor: Colors.blueGrey,
+
+      ),
+      body: Stack(
+        children:[
+          Container(
+            width: screenWidth, // Match the screen width
+            height: screenHeight, // Match the screen height
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("images/designbg.png"),
+                fit: BoxFit.fill, // Stretch to fill the entire screen
               ),
-              SizedBox(height: 16.0),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Description'),
-                onChanged: (value) {
-                  setState(() {
-                    _problemDescription = value;
-                  });
-                },
-              ),
-              SizedBox(height: 16.0),
-              Text('Selected Images:'),
-              SizedBox(height: 8.0),
-              _selectedImages.isEmpty
-                  ? Text('No images selected')
-                  : SizedBox(
-                height: 100.0,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _selectedImages.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: EdgeInsets.only(right: 8.0),
-                      child: Image.file(_selectedImages[index]),
-                    );
-                  },
-                ),
-              ),
-              SizedBox(height: 16.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => getImage(ImageSource.camera),
-                    child: Text('Take Photo'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => getImage(ImageSource.gallery),
-                    child: Text('Choose from Gallery'),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16.0),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _uploadProblem,
-                  child: Text('Upload Problem'),
-                ),
-              ),
-            ],
+            ),
           ),
+          Column(
+          children: [
+            _uploading
+                ? Center(
+              child: CircularProgressIndicator(),
+            )
+                : SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextFormField(
+                      decoration: InputDecoration(labelText: 'Title',border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),),
+                      onChanged: (value) {
+                        setState(() {
+                          _problemTitle = value;
+                        });
+                      },
+                    ),
+                    SizedBox(height: 16.0),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Description',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(vertical: 20.0,horizontal: 5), // Adjust vertical padding
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _problemDescription = value;
+                        });
+                      },
+                      maxLines: null, // Allow unlimited vertical expansion
+                    ),
+                    SizedBox(height: 16.0),
+                    Text('Selected Images:'),
+                    SizedBox(height: 8.0),
+                    _selectedImages.isEmpty
+                        ? Text('No images selected')
+                        : SizedBox(
+                      height: 100.0,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _selectedImages.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: EdgeInsets.only(right: 8.0),
+                            child: Image.file(_selectedImages[index]),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(height: 16.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => getImage(ImageSource.camera),
+                          child: Text('Take Photo'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => getImage(ImageSource.gallery),
+                          child: Text('Choose from Gallery'),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.0),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: _uploadProblem,
+                        child: Text('Upload Problem'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
+    ]
+      ),
+      bottomNavigationBar: bottomnavigation(
+        items: [
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person),
+            label: 'HOME',
+
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.add),
+            label: 'ADD POST',
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person),
+            label: 'PROFILE',
+          ),
+
+        ],
+
+        selectedIndex: _selectedIndex,
+
       ),
     );
   }

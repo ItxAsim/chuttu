@@ -16,7 +16,7 @@ class _PerLoginPageState extends State<PerLoginPage> {
 
 
   final _formKey = GlobalKey<FormState>();
-
+  bool _obscureText=true;
   bool signed = false;
 
   Future<void> _signIn() async {
@@ -104,13 +104,23 @@ class _PerLoginPageState extends State<PerLoginPage> {
                             SizedBox(height: 16.0),
                             TextFormField(
                               controller: _passwordController,
-                              obscureText: true,
+                              obscureText: _obscureText,
                               style: TextStyle(
                                   color: Colors.black54
                               ),
                               decoration: InputDecoration(
                                   icon: Icon(Icons.lock),
                                   labelText: 'Password',
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscureText ? Icons.visibility : Icons.visibility_off,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscureText = !_obscureText;
+                                      });
+                                    },
+                                  ),
                                   border:  OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10.0),)
 

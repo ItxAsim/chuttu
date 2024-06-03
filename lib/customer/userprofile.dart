@@ -1,7 +1,4 @@
 import 'dart:io';
-
-import 'package:chuttu/perfessional%20authentications/Document%20verification.dart';
-import 'package:chuttu/perfessional%20authentications/Perfessional%20Service%20Page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -11,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'UserOrderList.dart';
+import 'bottomnavigation.dart';
 
 class UserProfileScreen extends StatefulWidget {
   @override
@@ -23,7 +21,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   final ImagePicker _picker = ImagePicker();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String? _imageUrl;
-
+  int _selectedIndex=2;
   late Stream<DocumentSnapshot> _professionalStream;
 
   @override
@@ -197,7 +195,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('User Profile'),
+        title: Text('User Profile'),backgroundColor: Colors.blueGrey,
+
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: _professionalStream,
@@ -290,7 +289,30 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ],
             ),
           );
+
         },
+
+      ),
+      bottomNavigationBar: bottomnavigation(
+        items: [
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person),
+            label: 'HOME',
+
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.add),
+            label: 'ADD POST',
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person),
+            label: 'PROFILE',
+          ),
+
+        ],
+
+        selectedIndex: _selectedIndex,
+
       ),
     );
   }

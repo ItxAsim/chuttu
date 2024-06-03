@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'emailVerifiction.dart';
+
 class PerSignupPage  extends StatefulWidget {
   @override
   _PerSignupPageState createState() => _PerSignupPageState();
@@ -25,6 +27,7 @@ class _PerSignupPageState extends State<PerSignupPage> {
   String _Profile_url='';
   TextEditingController _smsCodeController = TextEditingController();
   String _verificationId = '';
+  bool  _obscureText=true;
   Future<void> _signInWithPhoneNumber() async {
     try {
       PhoneAuthCredential credential = PhoneAuthProvider.credential(
@@ -45,7 +48,7 @@ class _PerSignupPageState extends State<PerSignupPage> {
   Future<void> _verifyPhoneNumber() async {
     try {
       await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: _phoneNumber.text, // Replace with your country code if needed.
+        phoneNumber: '+92${_phoneNumber.text}', // Replace with your country code if needed.
         verificationCompleted: (PhoneAuthCredential credential) async {
           await FirebaseAuth.instance.signInWithCredential(credential);
           _showSnackbar('phone verification successfull.');
@@ -90,30 +93,39 @@ class _PerSignupPageState extends State<PerSignupPage> {
         );
 
         if (authResult.user != null) {
+          // Send email verification
+          await authResult.user?.sendEmailVerification();
+
           // Save additional user details to Firestore
           await _firestore.collection('perfessionals').doc(authResult.user?.uid).set({
             'name': _name.text,
             'address': _address.text,
             'phoneNumber': _phoneNumber.text,
             'email': _email.text,
-            'Profile_url':_Profile_url,
+            'Profile_url': _Profile_url,
           });
-          _signInWithPhoneNumber();
-          if(verify==true)
-         { Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ProfessionalServicesPage()));}
+
+          _showSnackbar('Account created successfully. Please check your email to verify your account.');
+
+          // Redirect to the EmailVerificationPage
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => EmailVerificationPage()),
+          );
         }
       } catch (e) {
         setState(() {
-          signed=false;
+          signed = false;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error during sign in: $e")));
+            SnackBar(content: Text("Error during sign up: $e")));
         print('Exception @createAccount: $e');
         // Handle any errors (e.g., invalid email, weak password, etc.)
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -168,13 +180,23 @@ class _PerSignupPageState extends State<PerSignupPage> {
                             SizedBox(height: 16.0),
                             TextFormField(
                               controller: _password,
-                              obscureText: true,
+                              obscureText: _obscureText,
                               style: TextStyle(
                                   color: Colors.black54
                               ),
                               decoration: InputDecoration(
                                   icon: Icon(Icons.lock),
                                   labelText: 'Password',
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscureText ? Icons.visibility : Icons.visibility_off,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscureText = !_obscureText;
+                                      });
+                                    },
+                                  ),
                                   border:  OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10.0),)
 
@@ -224,13 +246,14 @@ class _PerSignupPageState extends State<PerSignupPage> {
                                 ),
                                 decoration: InputDecoration(
                                   labelText: 'Number',
+                                  hintText: "write without 0 like 3000..",
                                   icon: Icon(Icons.phone),
                                   border:  OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10.0),
                                   ),)
                             ),
                             SizedBox(height: 16.0),
-                            ElevatedButton(
+                            /*ElevatedButton(
 
                               onPressed: _verifyPhoneNumber,
                               child: Text('Send Verification Code'),
@@ -243,7 +266,7 @@ class _PerSignupPageState extends State<PerSignupPage> {
                                   border:  OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10.0),)
                               ),
-                            ),
+                            ),*/
 
 
                             ElevatedButton(

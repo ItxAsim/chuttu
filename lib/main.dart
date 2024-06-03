@@ -24,5 +24,8 @@ Future<void> main() async {
 else
   runApp( MaterialApp(
       home:SplashScreen(),
+    theme: ThemeData(
+      primarySwatch: Colors.blueGrey,
+    ),
   ));
 }

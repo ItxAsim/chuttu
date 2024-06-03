@@ -64,6 +64,7 @@ class _ProfessionalProfileState extends State<ProfessionalProfile> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Professional Profile'),
+        backgroundColor: Colors.blueGrey,
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance.collection('perfessionals').doc(widget.professionalId).snapshots(),

@@ -33,6 +33,7 @@ class _GigDetailsPageState extends State<GigDetailsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.gig['title']),
+        backgroundColor: Colors.blueGrey,
       ),
       body: SingleChildScrollView(
         child: Padding(

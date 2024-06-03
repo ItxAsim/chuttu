@@ -45,7 +45,7 @@ class _perhomeState extends State<perhome> {
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Colors.blueGrey,
               ),
               child: Text(
                 'Menu',
