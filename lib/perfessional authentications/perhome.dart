@@ -7,6 +7,8 @@ import 'package:chuttu/selctionpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import '../chatScreen.dart';
 class perhome extends StatefulWidget {
   const perhome({super.key});
 
@@ -37,6 +39,7 @@ class _perhomeState extends State<perhome> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Orders"),
+        backgroundColor: Colors.blueGrey,
 
       ),
       drawer: Drawer(
@@ -57,18 +60,22 @@ class _perhomeState extends State<perhome> {
             ),
       ListTile(
         title: Text('My Gigs'),
+        trailing: Icon(Icons.shop),
         onTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (context)=>UserGigPage()));
 
         }),
             ListTile(
                 title: Text('Place Bid'),
+                trailing: Icon(Icons.handyman),
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context)=>ProblemListPage()));
 
                 }),
             ListTile(
                 title: Text('Chat'),
+                trailing: Icon(Icons.chat),
+
                 onTap: () {
                   String professionalId=FirebaseAuth.instance.currentUser!.uid;
                   Navigator.push(context, MaterialPageRoute(builder: (context)=>UserListScreen(professionalId:professionalId )));
@@ -76,12 +83,14 @@ class _perhomeState extends State<perhome> {
                 }),
             ListTile(
                 title: Text('My Bid'),
+                trailing: Icon(Icons.card_travel),
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context)=>CurrentUserBids()));
 
                 }),
             ListTile(
               title: Text('Sign Out'),
+              trailing: Icon(Icons.exit_to_app),
               onTap: () {
                 _signOut(context);
                 Navigator.pop(context);
@@ -122,9 +131,17 @@ class _perhomeState extends State<perhome> {
                       Text('Customer Phone number: ${order['phoneNumber']}'),
                       Text('Details: ${order['details']}'),
                       Text('payment: ${order['payment']}'??''),
+                      Text("Adress: ${order['location']}"),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          ElevatedButton(onPressed: () async {
+
+                           DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('users').doc(order['customer_id']).get();
+                             Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
+                             Navigator.push(context, MaterialPageRoute(builder: (context)=>ChatScreen(senderId: order['professionalId'], receiverId: order['customer_id'], receiverName: userData['name'], receiverProfileImage: userData['profileImageUrl'],)
+                             ));
+                          }, child: Text('Chat')),
                           ElevatedButton(
                             onPressed: () => _acceptOrder(orders[index].id),
                             child: Text('Accept'),
