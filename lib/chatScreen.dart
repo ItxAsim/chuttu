@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:chuttu/perfessional%20authentications/userRecieverprofile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
+import 'Notification_Services.dart';
+import 'auth_services.dart';
 import 'customer/proffesionalprofile.dart';
+import 'package:http/http.dart' as http;
 
 class ChatScreen extends StatefulWidget {
   final String senderId;
@@ -18,6 +23,8 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
    bool user=false;
+   final NotificationServices _notificationServices = NotificationServices();
+   final AuthService _authService = AuthService();
   @override
 void initState() {
     // TODO: implement initState
@@ -38,20 +45,77 @@ void initState() {
   final TextEditingController _controller = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  void sendMessage(String message) {
-    if (message.isNotEmpty) {
-      _firestore.collection('messages').add({
-        'text': message,
-        'sender': widget.senderId,
-        'receiver': widget.receiverId,
-        'timestamp': FieldValue.serverTimestamp(),
-        'status': 'delivered',
-      });
-      _controller.clear();
-    }
-  }
+   Future<void> sendMessage(String message) async {
+     if (message.isNotEmpty) {
+       // Add message to Firestore collection
+       await _firestore.collection('messages').add({
+         'text': message,
+         'sender': widget.senderId,
+         'receiver': widget.receiverId,
+         'timestamp': FieldValue.serverTimestamp(),
+         'status': 'delivered',
+       });
+       _controller.clear();
 
-  void markAsRead(DocumentSnapshot document) {
+       // Fetch device tokens for the receiver
+       List<String> deviceTokens = [];
+       var tokenSnapshot = await _firestore.collection('pushtokens').doc(widget.receiverId).get();
+
+       if (tokenSnapshot.exists && tokenSnapshot.data() != null) {
+         deviceTokens = List<String>.from(tokenSnapshot.data()!['tokens']);
+       }
+
+       if (deviceTokens.isEmpty) {
+         print('No device tokens found for receiver');
+         return;
+       }
+
+       // Fetch access token
+       String accessToken = await _authService.getAccessToken();
+
+       // Send notifications to all device tokens
+       for (String deviceToken in deviceTokens) {
+         var data = {
+           'message': {
+             'token': deviceToken,
+             'notification': {
+               'title': widget.receiverName,
+               'body': message,
+             },
+             'android': {
+               'notification': {
+                 'notification_count': 1,
+               },
+             },
+             'data': {
+               'type': 'msj',
+               'user':user,
+               'id': 'dummy_id',
+             }
+           }
+         };
+
+         var response = await http.post(
+           Uri.parse('https://fcm.googleapis.com/v1/projects/chuttu-29802/messages:send'),
+           body: jsonEncode(data),
+           headers: {
+             'Content-Type': 'application/json; charset=UTF-8',
+             'Authorization': 'Bearer $accessToken',
+           },
+         );
+
+         // Optionally, handle the response
+         if (response.statusCode == 200) {
+           print('Notification sent successfully to $deviceToken');
+         } else {
+           print('Failed to send notification to $deviceToken: ${response.body}');
+         }
+       }
+     }
+   }
+
+
+   void markAsRead(DocumentSnapshot document) {
     if (document['status'] == 'delivered' && document['receiver'] == widget.senderId) {
       _firestore.collection('messages').doc(document.id).update({'status': 'read'});
     }

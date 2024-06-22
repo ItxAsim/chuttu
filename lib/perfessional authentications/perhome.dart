@@ -1,3 +1,4 @@
+import 'package:chuttu/Notification_Services.dart';
 import 'package:chuttu/perfessional%20authentications/MyBids.dart';
 import 'package:chuttu/perfessional%20authentications/Userlist.dart';
 import 'package:chuttu/perfessional%20authentications/bottomNavigationPerfessional.dart';
@@ -18,8 +19,63 @@ class perhome extends StatefulWidget {
 
 class _perhomeState extends State<perhome> {
   @override
+  final User? _user = FirebaseAuth.instance.currentUser;
+  late final String _userId;
   int _selectedIndex=0;
+  NotificationServices notificationServices=NotificationServices();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    notificationServices.requestNotificationPermission();
+    _userId = _user?.uid ?? '';
+
+    notificationServices.forgroundMessage();
+    notificationServices.firebaseInit(context);
+    notificationServices.setupInteractMessage(context);
+    notificationServices.isTokenRefresh();
+
+    notificationServices.getDeviceToken().then((value) { print('token');
+    print(value);
+    FirebaseFirestore.instance
+        .collection('pushtokens')
+        .doc(_userId)
+        .get()
+        .then((docSnapshot) {
+      if (docSnapshot.exists) {
+        // Token exists in Firestore, add new token to the array if it's not already there
+        List<dynamic> tokens = docSnapshot.data()?['tokens'] ?? [];
+        if (!tokens.contains(value)) {
+          tokens.add(value);
+          FirebaseFirestore.instance
+              .collection('pushtokens')
+              .doc(_userId)
+              .update({
+            'tokens': tokens,
+            'updatedAt': DateTime.now(),
+          });
+        }
+      } else {
+        // Token doesn't exist in Firestore, so create an array and store the new token
+        FirebaseFirestore.instance
+            .collection('pushtokens')
+            .doc(_userId)
+            .set({
+          'tokens': [value],
+          'createdAt': DateTime.now(),
+        });
+      }
+    });
+
+
+
+    }
+    );
+  }
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+
   Future<void> _signOut(BuildContext context) async {
     try {
       await _auth.signOut();

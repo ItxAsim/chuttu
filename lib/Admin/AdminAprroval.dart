@@ -8,7 +8,6 @@ class AdminApprovalPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Admin Approval'),
       ),
-
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('perfessionals').snapshots(),
         builder: (context, snapshot) {
@@ -23,7 +22,7 @@ class AdminApprovalPage extends StatelessWidget {
 
           return ListView.builder(
             itemCount: documents.length,
-            itemBuilder: (context, index) => _buildListItem(context, documents[index]), // Pass context explicitly
+            itemBuilder: (context, index) => _buildListItem(context, documents[index]),
           );
         },
       ),
@@ -31,12 +30,13 @@ class AdminApprovalPage extends StatelessWidget {
   }
 
   Widget _buildListItem(BuildContext context, DocumentSnapshot document) {
-    final cnicNumber = document['cnic'];
-    final services = document['services'];
-    final status = document['status'];
-    final frontCnicUrl = document['front_cnic_image_url'];
-    final backCnicUrl = document['back_cnic_image_url'];
-    final userpicUrl = document['userpic'];
+    final data = document.data() as Map<String, dynamic>;
+    final cnicNumber = data.containsKey('cnic') ? data['cnic'] : '';
+    final services = data.containsKey('services') ? data['services'] : [];
+    final status = data.containsKey('status') ? data['status'] : '';
+    final frontCnicUrl = data.containsKey('front_cnic_image_url') ? data['front_cnic_image_url'] : '';
+    final backCnicUrl = data.containsKey('back_cnic_image_url') ? data['back_cnic_image_url'] : '';
+    final userpicUrl = data.containsKey('userpic') ? data['userpic'] : '';
 
     return ExpansionTile(
       title: Text('Professional ID: ${document.id}'),
@@ -62,44 +62,41 @@ class AdminApprovalPage extends StatelessWidget {
             ),
           ],
         ),
-        if (frontCnicUrl != null || backCnicUrl != null)
+        if (frontCnicUrl.isNotEmpty || backCnicUrl.isNotEmpty || userpicUrl.isNotEmpty)
           SizedBox(
-            height: 150, // Adjust height as needed
+            height: 150,
             child: Row(
               children: [
-                if (frontCnicUrl != null)
+                if (frontCnicUrl.isNotEmpty)
                   Flexible(
                     child: GestureDetector(
-                      onTap: () => _showImageFullScreen(context, frontCnicUrl), // Pass context
+                      onTap: () => _showImageFullScreen(context, frontCnicUrl),
                       child: FadeInImage(
                         placeholder: AssetImage('images/placeholder.jpeg'),
                         image: NetworkImage(frontCnicUrl),
                         fit: BoxFit.cover,
-                        // Handle image errors
                       ),
                     ),
                   ),
-                if (backCnicUrl != null)
+                if (backCnicUrl.isNotEmpty)
                   Flexible(
                     child: GestureDetector(
-                      onTap: () => _showImageFullScreen(context, backCnicUrl), // Pass context
+                      onTap: () => _showImageFullScreen(context, backCnicUrl),
                       child: FadeInImage(
                         placeholder: AssetImage('images/placeholder.jpeg'),
                         image: NetworkImage(backCnicUrl),
                         fit: BoxFit.cover,
-                        // Handle image errors
                       ),
                     ),
                   ),
-                if (userpicUrl != null)
+                if (userpicUrl.isNotEmpty)
                   Flexible(
                     child: GestureDetector(
-                      onTap: () => _showImageFullScreen(context, userpicUrl), // Pass context
+                      onTap: () => _showImageFullScreen(context, userpicUrl),
                       child: FadeInImage(
                         placeholder: AssetImage('images/placeholder.jpeg'),
-                        image: NetworkImage(frontCnicUrl),
+                        image: NetworkImage(userpicUrl),
                         fit: BoxFit.cover,
-                        // Handle image errors
                       ),
                     ),
                   ),
@@ -111,20 +108,19 @@ class AdminApprovalPage extends StatelessWidget {
   }
 
   void _showImageFullScreen(BuildContext context, String imageUrl) {
-    // Use the Hero widget for smooth transition animation
     Navigator.push(
-      context, // Pass context directly
+      context,
       MaterialPageRoute(
-        builder: (context) => Hero(
-          tag: imageUrl, // Use the image URL as the tag
-          child: Scaffold(
-            appBar: AppBar(
-              title: Text('Image'),
-            ),
-            body: Center(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: Text('Image'),
+          ),
+          body: Center(
+            child: Hero(
+              tag: imageUrl,
               child: Image.network(
                 imageUrl,
-                fit: BoxFit.cover, // Adjust as needed
+                fit: BoxFit.cover,
               ),
             ),
           ),
@@ -134,14 +130,12 @@ class AdminApprovalPage extends StatelessWidget {
   }
 
   void _approveProfessional(String professionalId) {
-    // Update the status of the professional to 'approved' in Firestore
     FirebaseFirestore.instance.collection('perfessionals').doc(professionalId).update({
       'status': 'approved',
     });
   }
 
-        void _rejectProfessional(String professionalId) {
-    // Update the status of the professional to 'rejected' in Firestore
+  void _rejectProfessional(String professionalId) {
     FirebaseFirestore.instance.collection('perfessionals').doc(professionalId).update({
       'status': 'rejected',
     });

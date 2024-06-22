@@ -30,7 +30,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
         // Check if the user is an admin
         // You can implement your own logic to determine admin status
         // For example, by checking a field in Firestore or a custom claim
-        if (user.email == 'admin0535@gmail.com') {
+        if (user.email == 'asimaltaf037@gmail.com') {
           // Navigate to the admin dashboard
           Navigator.pushReplacement(
             context,

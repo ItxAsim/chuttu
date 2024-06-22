@@ -1,13 +1,20 @@
+import 'dart:convert';
+
+import 'package:chuttu/Notification_Services.dart';
 import 'package:chuttu/customer/chatlist.dart';
 import 'package:chuttu/customer/orderdetails.dart';
 import 'package:chuttu/customer/proffesionalprofile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+
+import '../shownotification.dart';
 import 'Gigdetails.dart';
 import 'UserUploadedProblem.dart';
 import 'bottomnavigation.dart';
+import 'package:http/http.dart' as http;
 
 class ApprovedGigsPage extends StatefulWidget {
   @override
@@ -20,11 +27,56 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
   late final String _userId;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  NotificationServices notificationServices=NotificationServices();
 
   @override
   void initState() {
     super.initState();
+    notificationServices.requestNotificationPermission();
     _userId = _user?.uid ?? '';
+
+    notificationServices.forgroundMessage();
+    notificationServices.firebaseInit(context);
+    notificationServices.setupInteractMessage(context);
+    notificationServices.isTokenRefresh();
+
+    notificationServices.getDeviceToken().then((value) { print('token');
+    print(value);
+    FirebaseFirestore.instance
+        .collection('pushtokens')
+        .doc(_userId)
+        .get()
+        .then((docSnapshot) {
+      if (docSnapshot.exists) {
+        // Token exists in Firestore, add new token to the array if it's not already there
+        List<dynamic> tokens = docSnapshot.data()?['tokens'] ?? [];
+        if (!tokens.contains(value)) {
+          tokens.add(value);
+          FirebaseFirestore.instance
+              .collection('pushtokens')
+              .doc(_userId)
+              .update({
+            'tokens': tokens,
+            'updatedAt': DateTime.now(),
+          });
+        }
+      } else {
+        // Token doesn't exist in Firestore, so create an array and store the new token
+        FirebaseFirestore.instance
+            .collection('pushtokens')
+            .doc(_userId)
+            .set({
+          'tokens': [value],
+          'createdAt': DateTime.now(),
+        });
+      }
+    });
+
+
+
+    }
+    );
+
     setState(() {
       _selectedIndex = 0;
     });
@@ -161,6 +213,15 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => UserUploadedProblems(userId: _userId)),
+              );
+            },
+          ),
+          ListTile(
+            title: const Text('show notification'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => shownotification())
               );
             },
           ),
