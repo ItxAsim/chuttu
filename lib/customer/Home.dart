@@ -25,6 +25,7 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
   int _selectedIndex = 0;
   final User? _user = FirebaseAuth.instance.currentUser;
   late final String _userId;
+  String? location;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   NotificationServices notificationServices=NotificationServices();
@@ -199,6 +200,7 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
           ),
           ListTile(
             title: const Text('Show Services'),
+            trailing: Icon(Icons.design_services_outlined),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -209,6 +211,7 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
           ),
           ListTile(
             title: const Text('My uploaded Problems'),
+            trailing: Icon(Icons.card_giftcard),
             onTap: () {
               Navigator.push(
                 context,
@@ -216,7 +219,7 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
               );
             },
           ),
-          ListTile(
+          /*ListTile(
             title: const Text('show notification'),
             onTap: () {
               Navigator.push(
@@ -224,15 +227,17 @@ class _ApprovedGigsPageState extends State<ApprovedGigsPage> {
                 MaterialPageRoute(builder: (context) => shownotification())
               );
             },
-          ),
+          ),*/
           ListTile(
             title: Text("Chat"),
+            trailing: Icon(Icons.chat),
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => UserListScreencustumer()));
             },
           ),
           ListTile(
             title: const Text('Sign Out'),
+            trailing: Icon(Icons.exit_to_app),
             onTap: () {
               _signOut(context);
               Navigator.pop(context);
@@ -450,14 +455,15 @@ class CustomSearchDelegate extends SearchDelegate {
         professionals.forEach((professional) {
           final professionalData = professional.data() as Map<String, dynamic>;
           final List<dynamic>? gigs = professionalData['gigs'];
-          final String professionalId = professionalData['userId']?.toString() ?? '';
-          if (gigs != null) {
+          final String professionalId = professionalData['userId']?.toString()?? '';
+          if (gigs!= null) {
             final List<dynamic> approvedGigs = gigs.where((gig) => gig['gigstatus'] == 'Approved').toList();
 
             final filteredGigs = approvedGigs.where((gig) {
-              final gigTitle = gig['title']?.toString().toLowerCase() ?? '';
+              final gigTitle = gig['title']?.toString().toLowerCase()?? '';
+              final gigLocation = gig['location']?.toString().toLowerCase()?? '';
               final searchQuery = query.toLowerCase();
-              return gigTitle.contains(searchQuery);
+              return gigTitle.contains(searchQuery) || gigLocation.contains(searchQuery);
             }).toList();
 
             gigCards.addAll(_buildGigCards(context, filteredGigs, professionalId));

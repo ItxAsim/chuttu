@@ -105,12 +105,12 @@ class _PerSignupPageState extends State<PerSignupPage> {
             'Profile_url': _Profile_url,
           });
 
-          _showSnackbar('Account created successfully. Please check your email to verify your account.');
+          _showSnackbar('Account created successfully.');
 
           // Redirect to the EmailVerificationPage
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => EmailVerificationPage()),
+            MaterialPageRoute(builder: (context) => ProfessionalServicesPage()),
           );
         }
       } catch (e) {

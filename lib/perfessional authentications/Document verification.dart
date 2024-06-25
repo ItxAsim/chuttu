@@ -1,3 +1,4 @@
+import 'package:chuttu/perfessional%20authentications/perhome.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -108,11 +109,10 @@ bool submission=false;
       });
 
       // Show success message
-
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Request submitted for approval')),
       );
+      Navigator.push(context, MaterialPageRoute(builder: (context)=>perhome()));
       setState(() {
         submission=false;
       });

@@ -87,27 +87,44 @@ class _UserListScreencustumerState extends State<UserListScreencustumer> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blueGrey,
         title: Text('User List'),
       ),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _userListStream,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          final List<Map<String, dynamic>> users = snapshot.data!;
-          return ListView.builder(
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              final userData = users[index];
-              return _buildUserItem(userData);
+      body: Stack(
+        children: [
+          Container(
+            // Match the screen height
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("images/designbg.png"),
+                fit: BoxFit.fill, // Stretch to fill the entire screen
+              ),
+            ),
+          ),
+          StreamBuilder<List<Map<String, dynamic>>>(
+            stream: _userListStream,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              final List<Map<String, dynamic>> users = snapshot.data!;
+              return ListView.builder(
+                itemCount: users.length,
+                itemBuilder: (context, index) {
+                  final userData = users[index];
+                  return Card(color:Colors.white70,
+                      child: _buildUserItem(userData));
+                },
+              );
             },
-          );
-        },
+          ),
+        ]
       ),
     );
   }

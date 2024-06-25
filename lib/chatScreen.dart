@@ -125,6 +125,7 @@ void initState() {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blueGrey,
         title:  InkWell(
           onTap: ()=>{
             user?Navigator.push(context,
@@ -143,88 +144,100 @@ void initState() {
           ),
         ),
       ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: StreamBuilder<List<QuerySnapshot>>(
-              stream: CombineLatestStream.list([
-                _firestore
-                    .collection('messages')
-                    .where('sender', isEqualTo: widget.senderId)
-                    .where('receiver', isEqualTo: widget.receiverId)
-                    .orderBy('timestamp') // Default is ascending order
-                    .snapshots(),
-                _firestore
-                    .collection('messages')
-                    .where('sender', isEqualTo: widget.receiverId)
-                    .where('receiver', isEqualTo: widget.senderId)
-                    .orderBy('timestamp') // Default is ascending order
-                    .snapshots(),
-              ]),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
-                }
-
-                final List<QueryDocumentSnapshot> messages = snapshot.data!
-                    .expand((querySnapshot) => querySnapshot.docs)
-                    .toList()
-                  ..sort((a, b) {
-                    Timestamp aTimestamp = a['timestamp'] ?? Timestamp.now();
-                    Timestamp bTimestamp = b['timestamp'] ?? Timestamp.now();
-                    return aTimestamp.compareTo(bTimestamp);
-                  });
-
-                List<Widget> messageWidgets = [];
-                for (var message in messages) {
-                  final messageText = message['text'];
-                  final messageSender = message['sender'];
-                  final messageReceiver = message['receiver'];
-                  final messageStatus = message['status'];
-
-                  final messageWidget = MessageBubble(
-                    sender: messageSender,
-                    text: messageText,
-                    isMe: widget.senderId == messageSender,
-                    status: messageStatus,
-                  );
-
-                  if (messageReceiver == widget.senderId) {
-                    markAsRead(message);
+      body: Stack(
+        children: [
+          Container(
+            // Match the screen height
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("images/designbg.png"),
+                fit: BoxFit.fill, // Stretch to fill the entire screen
+              ),
+            ),
+          ),
+          Column(
+          children: <Widget>[
+            Expanded(
+              child: StreamBuilder<List<QuerySnapshot>>(
+                stream: CombineLatestStream.list([
+                  _firestore
+                      .collection('messages')
+                      .where('sender', isEqualTo: widget.senderId)
+                      .where('receiver', isEqualTo: widget.receiverId)
+                      .orderBy('timestamp') // Default is ascending order
+                      .snapshots(),
+                  _firestore
+                      .collection('messages')
+                      .where('sender', isEqualTo: widget.receiverId)
+                      .where('receiver', isEqualTo: widget.senderId)
+                      .orderBy('timestamp') // Default is ascending order
+                      .snapshots(),
+                ]),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(child: CircularProgressIndicator());
                   }
 
-                  messageWidgets.add(messageWidget);
-                }
+                  final List<QueryDocumentSnapshot> messages = snapshot.data!
+                      .expand((querySnapshot) => querySnapshot.docs)
+                      .toList()
+                    ..sort((a, b) {
+                      Timestamp aTimestamp = a['timestamp'] ?? Timestamp.now();
+                      Timestamp bTimestamp = b['timestamp'] ?? Timestamp.now();
+                      return aTimestamp.compareTo(bTimestamp);
+                    });
 
-                return ListView(
-                  children: messageWidgets,
-                );
-              },
+                  List<Widget> messageWidgets = [];
+                  for (var message in messages) {
+                    final messageText = message['text'];
+                    final messageSender = message['sender'];
+                    final messageReceiver = message['receiver'];
+                    final messageStatus = message['status'];
+
+                    final messageWidget = MessageBubble(
+                      sender: messageSender,
+                      text: messageText,
+                      isMe: widget.senderId == messageSender,
+                      status: messageStatus,
+                    );
+
+                    if (messageReceiver == widget.senderId) {
+                      markAsRead(message);
+                    }
+
+                    messageWidgets.add(messageWidget);
+                  }
+
+                  return ListView(
+                    children: messageWidgets,
+                  );
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your message...',
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your message...',
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: () {
-                    sendMessage(_controller.text);
-                  },
-                ),
-              ],
+                  IconButton(
+                    icon: Icon(Icons.send),
+                    onPressed: () {
+                      sendMessage(_controller.text);
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      ]),
     );
   }
 }
